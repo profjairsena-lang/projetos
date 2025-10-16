@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Desafio das Palavras — Layout Ajustado</title>
+
+
+    <style>
+        :root {
+            --accent: #ff6b35;
+            --accent-dark: #e0551a;
+            --gold: #ffd700;
+            --muted: #6b7280;
+            --success: #28a745;
+        }
+
+        body {
+            margin: 0;
+            font-family: Inter, Arial, sans-serif;
+            background: linear-gradient(135deg, #fd7e14, #ffc107);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+
+        .app {
+            width: 100%;
+            max-width: 1100px
+        }
+
+        .panel {
+            background: white;
+            padding: 18px;
+            border-radius: 14px;
+            box-shadow: 0 6px 22px rgba(0, 0, 0, 0.12);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 22px
+        }
+
+        .muted {
+            color: var(--muted);
+            font-size: 13px
+        }
+
+        #currentName {
+            text-transform: uppercase;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            padding: 8px 12px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            align-items: center;
+            color: white;
+        }
+
+
+        .btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn.ghost {
+            background: #f1f1f1;
+            color: #333;
+        }
+
+        .btn.small {
+            font-size: 13px;
+            padding: 6px 10px
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            margin-top: 12px;
+        }
+
+        .cell {
+            border: 2px solid #eee;
+            border-radius: 8px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .cell.painted {
+            color: white;
+            border-color: transparent
+        }
+
+        .palette {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .swatch {
+            width: 48px;
+            height: 32px;
+            border-radius: 8px;
+            border: 3px solid transparent;
+            cursor: pointer;
+        }
+
+        .swatch.selected {
+            border-color: var(--gold);
+            transform: scale(1.06);
+        }
+
+        .swatch.blocked {
+            filter: grayscale(80%);
+            opacity: .4;
+            cursor: not-allowed;
+        }
+
+        .score {
+            font-weight: 800;
+            color: var(--accent);
+            font-size: 18px;
+        }
+
+        .section-top,
+        .section-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .section-bottom .group {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        @media(max-width:720px) {
+
+            .section-top,
+            .section-bottom {
+                flex-direction: column;
+                align-items: flex-start
+            }
+
+            .grid {
+                grid-template-columns: repeat(5, minmax(0, 1fr));
+            }
+
+            .cell {
+                height: 48px;
+                font-size: 14px
+            }
+        }
+
+        .toast {
+            position: fixed;
+            right: 16px;
+            bottom: 16px;
+            background: var(--success);
+            color: white;
+            padding: 10px 14px;
+            border-radius: 8px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 16px;
+            font-size: 14px;
+            color: #6b7280;
+            /* tom neutro */
+            background: linear-gradient(180deg, #fff4ee, #ffe8d9);
+            /* suave e harmônico */
+            border-top: 1px solid #ddd;
+            margin-top: 24px;
+            border-radius: 0 0 14px 14px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="popup"
+        style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);display:flex;justify-content:center;align-items:center;">
+        <div
+            style="background:white;padding:20px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.2);max-width:300px;width:100%;">
+            <h2 style="margin-top:0;">👥 Nomes dos Jogadores</h2>
+            <label class="muted" for="inputPlayer1">Jogador 1:</label>
+            <input type="text" id="inputPlayer1" placeholder="Jogador 1" style="width:100%;margin-bottom:10px;" />
+            <label class="muted" for="inputPlayer2">Jogador 2:</label>
+            <input type="text" id="inputPlayer2" placeholder="Jogador 2" style="width:100%;margin-bottom:14px;" />
+            <button class="btn small" onclick="setPlayerNames()">✅ Confirmar</button>
+        </div>
+    </div>
+
+
+    <div id="resultModal"
+        style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;justify-content:center;align-items:center;">
+        <div
+            style="background:white;padding:24px;border-radius:12px;max-width:400px;width:90%;text-align:left;box-shadow:0 4px 12px rgba(0,0,0,0.2);">
+            <h2 style="text-align:center;">🏁 Fim de Jogo!</h2>
+            <p><strong id="winnerText"></strong></p>
+            <div id="phraseList" style="margin-top:12px;"></div>
+            <div style="text-align:center;margin-top:20px;">
+                <button class="btn small" onclick="restartGame()">🔄 Jogar Novamente</button>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="app">
+        <div class="panel">
+            <h1>🎮 Desafio das Palavras</h1>
+
+            <!-- ======= SEÇÃO SUPERIOR ======= -->
+            <div class="section-top" style="margin-top:10px">
+                <!-- Vez de -->
+                <div>
+                    <div class="muted">Agora é sua Vez:</div>
+                    <div style="font-weight:700;font-size:18px " id="currentName">Jogador</div>
+                </div>
+
+                <!-- Placar -->
+                <div style="display:flex;gap:14px;align-items:center;">
+                    <div style="text-align:center;">
+                        <div class="muted">Jogador 1</div>
+                        <div class="score" id="score1">0</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <div class="muted">Jogador 2</div>
+                        <div class="score" id="score2">0</div>
+                    </div>
+                </div>
+
+                <!-- Paleta -->
+                <div style="text-align:center;">
+                    <div class="muted">Paleta (toque para escolher)</div>
+                    <div class="palette" id="palette"></div>
+                </div>
+            </div>
+
+            <!-- ======= GRID ======= -->
+            <div class="grid" id="grid"></div>
+
+            <!-- ======= SEÇÃO INFERIOR ======= -->
+            <div class="section-bottom" style="margin-top:14px">
+                <div class="group">
+                    <!-- Config rápida -->
+                    <div>
+                        <div class="muted small">Config rápida</div>
+                        <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;">
+                            <button class="btn small" id="btnShuffle">🔀 Embaralhar</button>
+                            <button class="btn ghost small" id="btnReset">♻️ Reiniciar</button>
+                        </div>
+                    </div>
+
+                    <!-- Salvar estado -->
+                    <div>
+                        <div class="muted small">Salvar estado</div>
+                        <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;">
+                            <button class="btn small" id="btnSaveState">💾 Salvar</button>
+                            <button class="btn ghost small" id="btnLoadState">📂 Carregar</button>
+                        </div>
+                    </div>
+
+                    <!-- Contadores -->
+                    <div>
+                        <div class="muted small">Contadores</div>
+                        <div style="display:flex;gap:10px;margin-top:4px;">
+                            <span class="muted small">Pintadas: <b id="paintedCount">0</b>/30</span>
+                            <span class="muted small">Cor: <b id="currentColorUses">0</b>/5</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-left:auto;">
+                    <button class="btn" id="btnEnd">🏁 Terminar</button>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>© 2025 Desafio das Palavras — Desenvolvido por Prof Jair Sena</p>
+        </footer>
+    </div>
+
+    <div id="toastRoot"></div>
+
+    <script>
+
+        function restartGame() {
+            $('resultModal').style.display = 'none';
+            resetGame();
+            $('popup').style.display = 'flex'; // Reabre a janela de nomes
+        }
+
+        let paintedThisTurn = 0;// contador de palaras
+
+
+
+
+        function setPlayerNames() {
+            const name1 = $('inputPlayer1').value.trim() || "Jogador 1";
+            const name2 = $('inputPlayer2').value.trim() || "Jogador 2";
+            player1 = name1;
+            player2 = name2;
+
+            // Atualiza os nomes na interface
+            $('score1').previousElementSibling.textContent = player1;
+            $('score2').previousElementSibling.textContent = player2;
+            $('currentName').textContent = currentPlayer === 1 ? player1 : player2;
+
+            toast('Nomes atualizados!');
+            document.getElementById('popup').style.display = 'none';
+
+        }
+        /* ======= check ======= */
+
+
+        function checkGameEnd() {
+            if (paintedCount >= 30) {
+                let msg = '';
+                if (playerScores[1] > playerScores[2]) {
+                    msg = `${player1} venceu com ${playerScores[1]} pontos!`;
+                } else if (playerScores[2] > playerScores[1]) {
+                    msg = `${player2} venceu com ${playerScores[2]} pontos!`;
+                } else {
+                    msg = `Empate! Ambos marcaram ${playerScores[1]} pontos.`;
+                }
+                $('winnerText').textContent = msg;
+
+                // Agrupa as células pintadas por frase
+                const paintedCells = Array.from(document.querySelectorAll('.cell.painted'));
+                const phrasesMap = {};
+
+                paintedCells.forEach(cell => {
+                    const phraseIndex = cell.dataset.p;
+                    const word = cell.textContent;
+                    const pos = parseInt(cell.dataset.pos);
+                    if (!phrasesMap[phraseIndex]) phrasesMap[phraseIndex] = [];
+                    phrasesMap[phraseIndex][pos - 1] = word;
+                });
+
+                // Monta visualização apenas das frases completas (5 palavras)
+                const phraseContainer = $('phraseList');
+                phraseContainer.innerHTML = '';
+                Object.values(phrasesMap).forEach(words => {
+                    if (words.length === 5 && words.every(w => w)) {
+                        const linha = document.createElement('p');
+                        linha.textContent = `🧩 ${words.join(' ')}`;
+                        linha.style.margin = '4px 0';
+                        phraseContainer.appendChild(linha);
+                    }
+                });
+
+                $('resultModal').style.display = 'flex';
+            }
+        }
+
+
+
+
+        /* ======= CONFIG ======= */
+        const PALETTE = [
+            { id: 'c0', css: 'linear-gradient(135deg,#28a745,#20c997)' },
+            { id: 'c1', css: 'linear-gradient(135deg,#007bff,#17a2b8)' },
+            { id: 'c2', css: 'linear-gradient(135deg,#fd7e14,#ffc107)' },
+            { id: 'c3', css: 'linear-gradient(135deg,#6f42c1,#e83e8c)' },
+            { id: 'c4', css: 'linear-gradient(135deg,#ffc107,#ffed4e)' },
+            { id: 'c5', css: 'linear-gradient(135deg,#87ceeb,#6dd5ed)' }
+        ];
+        let player1 = "Jogador 1", player2 = "Jogador 2";
+        let currentPlayer = 1, selectedColorId = null;
+        let colorUses = {}, blockedColors = new Set();
+        let paintedCount = 0, playerScores = { 1: 0, 2: 0 };
+        let gamePhrases = [
+            ['EU', 'GOSTO', 'DE', 'COMER', 'FRUTAS'],
+            ['O', 'SOL', 'BRILHA', 'NO', 'CÉU'],
+            ['A', 'FLOR', 'É', 'BELA', 'DEMAIS'],
+            ['MEU', 'CÃO', 'LATE', 'BEM', 'ALTO'],
+            ['EU', 'LEIO', 'LIVROS', 'TODO', 'DIA'],
+            ['A', 'ESCOLA', 'É', 'MUITO', 'LEGAL'],
+            ['GOSTO', 'DE', 'BRINCAR', 'NO', 'PARQUE'],
+            ['O', 'GATO', 'DORME', 'NA', 'CAMA'],
+            ['EU', 'TENHO', 'UM', 'BOM', 'AMIGO'],
+            ['A', 'ÁGUA', 'É', 'BOA', 'DEMAIS'],
+            ['O', 'CÉU', 'FICA', 'AZUL', 'CLARO'],
+            ['EU', 'CORRO', 'NO', 'PÁTIO', 'GRANDE'],
+            ['A', 'BOLA', 'É', 'MINHA', 'AMIGA'],
+            ['MAMÃE', 'FAZ', 'BOLO', 'DE', 'CHOCOLATE'],
+            ['O', 'PASSARINHO', 'CANTA', 'NA', 'ÁRVORE'],
+            ['EU', 'AJUDO', 'MEU', 'IRMÃO', 'PEQUENO'],
+            ['A', 'TERRA', 'É', 'NOSSO', 'LAR'],
+            ['GOSTO', 'DE', 'DESENHAR', 'COM', 'LÁPIS'],
+            ['O', 'SORVETE', 'É', 'BEM', 'GOSTOSO'],
+            ['EU', 'TENHO', 'SONHOS', 'MUITO', 'LINDOS']
+        ];
+        let shuffled = [];
+
+        /* ======= UTILS ======= */
+        const $ = id => document.getElementById(id);
+        function toast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.getElementById('toastRoot').appendChild(t); setTimeout(() => t.remove(), 2000); }
+
+        /* ======= GRID / PALETA ======= */
+
+
+
+        function buildShuffled() {
+            shuffled = [];
+
+            // Sorteia 6 frases únicas
+            const selectedPhrases = [];
+            const usedIndexes = new Set();
+            while (selectedPhrases.length < 6 && usedIndexes.size < gamePhrases.length) {
+                const i = Math.floor(Math.random() * gamePhrases.length);
+                if (!usedIndexes.has(i)) {
+                    usedIndexes.add(i);
+                    selectedPhrases.push(gamePhrases[i]);
+                }
+            }
+
+            // Agrupa palavras por coluna (posição)
+            const columns = {
+                1: [], // coluna 1 (fixa)
+                2: [],
+                3: [],
+                4: [],
+                5: []
+            };
+
+            selectedPhrases.forEach((frase, phraseIndex) => {
+                for (let pos = 1; pos <= 5; pos++) {
+                    columns[pos].push({
+                        word: frase[pos - 1],
+                        phrase: phraseIndex,
+                        pos: pos,
+                        fixed: pos === 1
+                    });
+                }
+            });
+
+            // Função para embaralhar uma lista
+            function shuffleArray(arr) {
+                const copy = [...arr];
+                for (let i = copy.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [copy[i], copy[j]] = [copy[j], copy[i]];
+                }
+                return copy;
+            }
+
+            // Embaralha colunas 2 a 5
+            for (let col = 2; col <= 5; col++) {
+                columns[col] = shuffleArray(columns[col]);
+            }
+
+            // Monta o grid linha por linha
+            for (let i = 0; i < selectedPhrases.length; i++) {
+                for (let col = 1; col <= 5; col++) {
+                    const cell = columns[col].find(c => c.phrase === i);
+                    shuffled.push(cell);
+                }
+            }
+        }
+
+
+
+
+
+
+
+
+        function buildGrid() {
+            const g = $('grid'); g.innerHTML = '';
+            shuffled.forEach(w => {
+                const c = document.createElement('div');
+                c.className = 'cell';
+                c.textContent = w.word;
+                c.dataset.p = w.phrase; c.dataset.pos = w.pos;
+                c.onclick = () => paint(c);
+                g.appendChild(c);
+            });
+        }
+        function buildPalette() {
+            const p = $('palette'); p.innerHTML = '';
+            PALETTE.forEach(col => {
+                const s = document.createElement('div');
+                s.className = 'swatch';
+                s.style.background = col.css;
+                s.dataset.id = col.id;
+                s.onclick = () => selectColor(col.id);
+                p.appendChild(s);
+            });
+            refreshPalette();
+        }
+        function refreshPalette() {
+            document.querySelectorAll('.swatch').forEach(sw => {
+                const id = sw.dataset.id;
+                sw.classList.toggle('selected', selectedColorId === id);
+                sw.classList.toggle('blocked', blockedColors.has(id));
+            });
+            $('currentColorUses').textContent = selectedColorId ? (colorUses[selectedColorId] || 0) : 0;
+        }
+
+        /* ======= GAME LOGIC ======= */
+        function selectColor(id) {
+            // Impede troca de cor se ainda não pintou 5 palavras com a cor atual
+            if (selectedColorId && (colorUses[selectedColorId] || 0) < 5) {
+                toast('Você precisa pintar 5 palavras antes de trocar de cor');
+                return;
+            }
+
+            // Impede seleção de cor bloqueada
+            if (blockedColors.has(id)) {
+                toast('Cor bloqueada');
+                return;
+            }
+
+            selectedColorId = id;
+            colorUses[id] = 0;
+            blockedColors.add(id);
+            refreshPalette();
+        }
+
+
+
+        function paint(cell) { // função que pinta e conta as palavras
+            if (cell.classList.contains('painted')) return;
+
+            if (!selectedColorId) {
+                toast('Escolha uma cor');
+                return;
+            }
+
+            if (paintedThisTurn >= 5) {
+                toast('Você já pintou 5 palavras. Passe a vez!');
+                return;
+            }
+
+            if ((colorUses[selectedColorId] || 0) >= 5) {
+                toast('Limite de 5 por cor');
+                return;
+            }
+
+            const col = PALETTE.find(x => x.id === selectedColorId);
+            cell.classList.add('painted');
+            cell.dataset.cid = selectedColorId;
+            cell.style.background = col.css;
+            cell.style.color = 'white';
+
+            paintedCount++;
+            paintedThisTurn++;
+            $('paintedCount').textContent = paintedCount;
+
+            colorUses[selectedColorId] = (colorUses[selectedColorId] || 0) + 1;
+            refreshPalette();
+
+            if (checkSeq(selectedColorId)) toast('+20 pontos!');
+
+            // Troca de jogador somente após 5 palavras
+            if (paintedThisTurn === 5) {
+                selectedColorId = null;
+                refreshPalette();
+                switchPlayer();
+                paintedThisTurn = 0;
+            }
+
+            checkGameEnd();
+        }
+
+        function checkSeq(cid) {
+            const painted = Array.from(document.querySelectorAll(`.cell.painted[data-cid="${cid}"]`));
+            const groups = {};
+            painted.forEach(c => {
+                const p = c.dataset.p;
+                if (!groups[p]) groups[p] = [];
+                groups[p].push(+c.dataset.pos);
+            });
+            for (const p in groups) {
+                const arr = groups[p].sort((a, b) => a - b);
+                if (arr.join(',') === '1,2,3,4,5') {
+                    playerScores[currentPlayer] += 20;
+                    $('score1').textContent = playerScores[1];
+                    $('score2').textContent = playerScores[2];
+                    return true;
+                }
+            }
+            return false;
+        }
+        function switchPlayer() { currentPlayer = currentPlayer === 1 ? 2 : 1; $('currentName').textContent = currentPlayer === 1 ? player1 : player2; }
+        function resetGame() {
+            selectedColorId = null; blockedColors.clear(); colorUses = {};
+            paintedCount = 0; playerScores = { 1: 0, 2: 0 };
+            $('paintedCount').textContent = 0; $('score1').textContent = 0; $('score2').textContent = 0;
+            buildShuffled(); buildGrid(); refreshPalette();
+        }
+
+        /* ======= STATE SAVE ======= */
+        function saveState() { localStorage.setItem('dc_state', document.getElementById('grid').innerHTML); toast('Estado salvo'); }
+        function loadState() { const html = localStorage.getItem('dc_state'); if (html) { $('grid').innerHTML = html; toast('Carregado'); } }
+
+        /* ======= INIT ======= */
+        buildShuffled(); buildGrid(); buildPalette();
+        $('currentName').textContent = player1;
+        $('btnShuffle').onclick = () => { buildShuffled(); buildGrid(); toast('Embaralhado'); };
+        $('btnReset').onclick = () => resetGame();
+        $('btnSaveState').onclick = () => saveState();
+        $('btnLoadState').onclick = () => loadState();
+        $('btnEnd').onclick = () => toast('Jogo finalizado');
+    </script>
+
+
+
+</body>
+
+</html>

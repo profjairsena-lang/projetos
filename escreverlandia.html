@@ -1,0 +1,1883 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escrevilândia: A terra da escrita - Sistema Completo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #d1b670;
+        }
+
+        .word-input {
+            transition: all 0.3s ease;
+        }
+
+        .word-input:focus-within {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 8px;
+            max-height: 300px;
+            max-width: 500px;
+            overflow-y: auto;
+        }
+
+        .emoji-item {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            height: 48px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .emoji-item:hover {
+            background-color: #e0f2fe;
+            transform: scale(1.1);
+        }
+
+        .emoji-selected {
+            background-color: #bfdbfe;
+            border: 2px solid #3b82f6;
+        }
+
+        .emoji-button {
+            transition: all 0.2s;
+        }
+
+        .emoji-button:hover {
+            transform: scale(1.1);
+        }
+
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-content {
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-active .modal-content {
+            transform: scale(1);
+        }
+
+        .btn-primary {
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5);
+        }
+
+        .category-button {
+            transition: all 0.2s;
+        }
+
+        .category-button.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .category-button:hover:not(.active) {
+            background-color: #e0f2fe;
+        }
+
+        .emoji-preview {
+            font-size: 36px;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 12px;
+            background-color: #d87dc6;
+            transition: all 0.3s;
+        }
+
+        .emoji-preview:hover {
+            transform: scale(1.1);
+            background-color: #ffffff;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .word-card {
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+
+        .word-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .letter-input {
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+            text-align: center;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+        }
+
+        .letter-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            outline: none;
+        }
+
+        .letter-input.correct {
+            border-color: #10b981;
+            background-color: #f0fdf4;
+        }
+
+        .letter-input.incorrect {
+            border-color: #ef4444;
+            background-color: #fef2f2;
+        }
+
+        .progress-bar {
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(to right, #3b82f6, #10b981);
+            transition: width 0.5s ease;
+        }
+
+        .hypothesis-pre-silabica {
+            background-color: #fef2f2;
+            color: #dc2626;
+            border: 2px solid #fecaca;
+        }
+
+        .hypothesis-silabica {
+            background-color: #fef3c7;
+            color: #d97706;
+            border: 2px solid #fed7aa;
+        }
+
+        .hypothesis-silabico-alfabetica {
+            background-color: #ecfdf5;
+            color: #059669;
+            border: 2px solid #a7f3d0;
+        }
+
+        .hypothesis-alfabetica {
+            background-color: #eff6ff;
+            color: #2563eb;
+            border: 2px solid #bfdbfe;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chart-bar {
+            transition: width 0.8s ease-in-out;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Tela 1: Entrada de Palavras -->
+    <div id="input-screen" class="screen active">
+        <div class="min-h-screen bg-gradient-to-b from-red-50 to-blue-300 py-12">
+            <div class="container mx-auto px-4 max-w-4xl">
+                <!-- Cabeçalho -->
+                <header class="mb-10 text-center">
+                    <h1 class="text-3xl md:text-4xl font-bold text-indigo-600 mb-3">Escrevilândia: A terra da escrita
+                    </h1>
+                    <p class="text-lg text-gray-600">Preparação para avaliação da escrita infantil</p>
+                </header>
+
+                <!-- Conteúdo Principal -->
+                <main class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Entrada de Palavras</h2>
+                        <p class="text-gray-600">Professor(a), por favor, digite quatro palavras que a criança irá
+                            escrever. Para cada palavra, escolha um ícone ou emoji que a represente bem.</p>
+                    </div>
+
+                    <!-- Formulário de Palavras -->
+                    <form id="wordForm" class="space-y-6">
+                        <!-- Palavra 1 -->
+                        <div class="word-input bg-green-50 rounded-xl p-5 flex flex-col md:flex-row gap-4 items-center">
+                            <div class="emoji-preview cursor-pointer" data-index="0">
+                                💬
+                            </div>
+                            <div class="flex-grow">
+                                <label for="word1" class="block text-sm font-medium text-gray-700 mb-1">gabriel
+                                    1</label>
+                                <input type="text" id="word1" name="word1"
+                                    class="w-full border-2 border-green-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-blue-500"
+                                    placeholder="Digite uma palavra..." required>
+                            </div>
+
+                        </div>
+
+                        <!-- Palavra 2 -->
+                        <div class="word-input bg-blue-50 rounded-xl p-5 flex flex-col md:flex-row gap-4 items-center">
+                            <div class="emoji-preview cursor-pointer" data-index="1">
+                                💬
+                            </div>
+                            <div class="flex-grow">
+                                <label for="word2" class="block text-sm font-medium text-gray-700 mb-1">Palavra
+                                    2</label>
+                                <input type="text" id="word2" name="word2"
+                                    class="w-full border-2 border-blue-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="Digite uma palavra..." required>
+                            </div>
+                            <button type="button"
+                                class="emoji-button bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-lg flex items-center"
+                                data-index="1">
+                                <span class="mr-2">Escolher Ícone</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                    fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-7.536 5.879a1 1 0 001.415 0 3 3 0 014.242 0 1 1 0 001.415-1.415 5 5 0 00-7.072 0 1 1 0 000 1.415z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Palavra 3 -->
+                        <div class="word-input bg-blue-50 rounded-xl p-5 flex flex-col md:flex-row gap-4 items-center">
+                            <div class="emoji-preview cursor-pointer" data-index="2">
+                                💬
+                            </div>
+                            <div class="flex-grow">
+                                <label for="word3" class="block text-sm font-medium text-gray-700 mb-1">Palavra
+                                    3</label>
+                                <input type="text" id="word3" name="word3"
+                                    class="w-full border-2 border-blue-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="Digite uma palavra..." required>
+                            </div>
+                            <button type="button"
+                                class="emoji-button bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-lg flex items-center"
+                                data-index="2">
+                                <span class="mr-2">Escolher Ícone</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                    fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-7.536 5.879a1 1 0 001.415 0 3 3 0 014.242 0 1 1 0 001.415-1.415 5 5 0 00-7.072 0 1 1 0 000 1.415z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Palavra 4 -->
+                        <div class="word-input bg-blue-50 rounded-xl p-5 flex flex-col md:flex-row gap-4 items-center">
+                            <div class="emoji-preview cursor-pointer" data-index="3">
+                                💬
+                            </div>
+                            <div class="flex-grow">
+                                <label for="word4" class="block text-sm font-medium text-gray-700 mb-1">Palavra
+                                    4</label>
+                                <input type="text" id="word4" name="word4"
+                                    class="w-full border-2 border-blue-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="Digite uma palavra..." required>
+                            </div>
+                            <button type="button"
+                                class="emoji-button bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-lg flex items-center"
+                                data-index="3">
+                                <span class="mr-2">Escolher Ícone</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                    fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-7.536 5.879a1 1 0 001.415 0 3 3 0 014.242 0 1 1 0 001.415-1.415 5 5 0 00-7.072 0 1 1 0 000 1.415z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Botões de Ação -->
+                        <div class="flex justify-between pt-4">
+                            <button type="button"
+                                class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg">
+                                Cancelar
+                            </button>
+                            <div class="flex gap-3">
+                                <button type="button" id="previewBtn"
+                                    class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold py-3 px-6 rounded-lg">
+                                    Visualizar
+                                </button>
+                                <button type="button" id="nextBtn"
+                                    class="btn-primary bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg">
+                                    Próximo
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </main>
+
+                <!-- Rodapé -->
+                <footer class="mt-8 text-center text-gray-500 text-sm">
+                    <p>© 2025 Escrevilândia: A terra da escrita - Ferramenta para avaliação da escrita infantil</p>
+                </footer>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tela 2: Análise de Palavras -->
+    <div id="analysis-screen" class="screen">
+        <div class="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-100 py-8">
+            <div class="container mx-auto px-4 max-w-4xl">
+                <!-- Cabeçalho -->
+                <header class="mb-8">
+                    <h1 class="text-3xl md:text-4xl font-bold text-indigo-600 mb-3 text-center">Análise de Palavras</h1>
+
+                    <div class="flex items-center justify-between max-w-2xl mx-auto">
+                        <p class="text-lg text-gray-600 w-[70%]">Observe o ícone e escreva a palavra correspondente</p>
+                        <button id="analyze-btn"
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium w-[28%]">
+                            Analisar Palavra
+                        </button>
+                    </div>
+
+                    <!-- Barra de Progresso -->
+                    <div class="mt-6 max-w-md mx-auto">
+                        <div class="flex justify-between text-sm text-gray-600 mb-2">
+                            <span>Progresso</span>
+                            <span id="progress-text">1/4 palavras</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div id="progress-bar" class="progress-bar w-1/4"></div>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- Palavra Atual -->
+                <main class="max-w-2xl mx-auto">
+                    <div class="word-card bg-white rounded-2xl shadow-lg p-8 text-center fade-in">
+                        <div class="mb-8">
+                            <div class="text-8xl mb-6" id="current-emoji">🐶</div>
+                            <h3 class="text-2xl font-bold text-gray-800" id="current-word-title">Palavra 1</h3>
+                        </div>
+
+                        <div class="flex justify-center mb-8">
+                            <div id="current-letter-inputs" class="flex gap-3 flex-wrap justify-center">
+                                <!-- Inputs de letras serão inseridos aqui -->
+                            </div>
+                        </div>
+
+                        <!-- Botão de análise movido para o cabeçalho -->
+
+                        <div id="current-analysis" class="mt-8 hidden">
+                            <!-- Análise será inserida aqui -->
+                        </div>
+
+                        <div id="navigation-buttons" class="mt-8 hidden">
+                            <button id="next-word-btn"
+                                class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg text-lg font-medium">
+                                Próxima Palavra
+                            </button>
+                        </div>
+                    </div>
+                </main>
+
+                <!-- Botões de Ação -->
+                <div class="flex justify-center gap-4 mt-8">
+                    <button class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg"
+                        onclick="goBackToInput()">
+                        Voltar
+                    </button>
+                    <button id="finish-btn"
+                        class="btn-primary bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg hidden">
+                        Finalizar Análise
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tela 3: Avaliação Final -->
+    <div id="evaluation-screen" class="screen">
+        <div class="min-h-screen bg-gradient-to-b from-green-50 to-blue-100 py-8">
+            <div class="container mx-auto px-4 max-w-6xl">
+                <!-- Cabeçalho -->
+                <header class="mb-8 text-center">
+                    <h1 class="text-3xl md:text-4xl font-bold text-green-600 mb-3">Avaliação da Escrita</h1>
+                    <p class="text-lg text-gray-600">Análise completa do nível de escrita do aluno</p>
+                </header>
+
+                <!-- Resultado Principal -->
+                <div class="bg-white rounded-2xl shadow-lg p-8 mb-8 text-center">
+                    <div class="mb-6">
+                        <div id="final-hypothesis-badge"
+                            class="inline-block px-6 py-3 rounded-full text-xl font-bold mb-4">
+                            <!-- Hipótese final será inserida aqui -->
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Nível de Escrita Identificado</h2>
+                        <p id="hypothesis-description" class="text-gray-600 text-lg">
+                            <!-- Descrição da hipótese será inserida aqui -->
+                        </p>
+                    </div>
+
+                    <!-- Gráfico de Precisão -->
+                    <div class="mb-8">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Precisão Geral</h3>
+                        <div class="max-w-md mx-auto">
+                            <div class="flex justify-between text-sm text-gray-600 mb-2">
+                                <span>Acertos</span>
+                                <span id="overall-accuracy">0%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-4">
+                                <div id="overall-progress-bar"
+                                    class="chart-bar h-4 rounded-full bg-gradient-to-r from-green-400 to-blue-500">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Análise Detalhada -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <!-- Análise por Palavra (Protegida por senha) -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-bold text-gray-800">Análise por Palavra</h3>
+                            <button id="unlock-analysis-btn"
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-sm font-medium">
+                                Desbloquear
+                            </button>
+                        </div>
+
+                        <!-- Área de senha (inicialmente oculta) -->
+                        <div id="password-area" class="bg-gray-50 p-4 rounded-lg hidden">
+                            <p class="text-sm text-gray-600 mb-3">Esta seção está protegida. Digite a senha
+                                administrativa para visualizar os detalhes.</p>
+                            <div class="flex gap-2">
+                                <input type="password" id="admin-password"
+                                    class="flex-grow border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="Digite a senha...">
+                                <button id="submit-password-btn"
+                                    class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium">
+                                    Verificar
+                                </button>
+                            </div>
+                            <div id="password-error" class="text-red-500 text-sm mt-2 hidden">Senha incorreta. Tente
+                                novamente.</div>
+                        </div>
+
+                        <!-- Detalhes das palavras (inicialmente ocultos) -->
+                        <div id="word-analysis-details" class="space-y-4 hidden">
+                            <!-- Detalhes das palavras serão inseridos aqui -->
+                        </div>
+                    </div>
+
+                    <!-- Distribuição de Hipóteses -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Distribuição de Hipóteses</h3>
+                        <div id="hypothesis-distribution" class="space-y-3">
+                            <!-- Distribuição será inserida aqui -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recomendações -->
+                <div class="bg-white rounded-2xl shadow-lg p-8">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">Recomendações Pedagógicas</h3>
+                    <div id="recommendations" class="prose max-w-none">
+                        <!-- Recomendações serão inseridas aqui -->
+                    </div>
+                </div>
+
+                <!-- Botões de Ação -->
+                <div class="flex justify-center gap-4 mt-8">
+                    <button class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg"
+                        onclick="goBackToAnalysis()">
+                        Voltar à Análise
+                    </button>
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg"
+                        onclick="startNewEvaluation()">
+                        Nova Avaliação
+                    </button>
+                    <button class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg"
+                        onclick="showReportScreen()">
+                        Gerar Relatório
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tela 4: Relatório em Texto -->
+    <div id="report-screen" class="screen">
+        <div class="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-8">
+            <div class="container mx-auto px-4 max-w-4xl">
+                <!-- Cabeçalho -->
+                <header class="mb-8 text-center">
+                    <h1 class="text-3xl md:text-4xl font-bold text-gray-700 mb-3">Relatório de Avaliação</h1>
+                    <p class="text-lg text-gray-600">Copie o texto abaixo para salvar em arquivo</p>
+                </header>
+
+                <!-- Área do Relatório -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold text-gray-800">Relatório Completo</h3>
+                        <button id="copy-report-btn"
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                            📋 Copiar Texto
+                        </button>
+                    </div>
+
+                    <textarea id="report-text"
+                        class="w-full h-96 p-4 border-2 border-gray-200 rounded-lg font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        readonly>
+                        <!-- Relatório será gerado aqui -->
+                    </textarea>
+
+                    <div class="mt-4 text-sm text-gray-600">
+                        <p><strong>Instruções:</strong></p>
+                        <ul class="list-disc list-inside mt-2 space-y-1">
+                            <li>Clique no botão "Copiar Texto" para copiar todo o relatório</li>
+                            <li>Cole o conteúdo em um editor de texto (Bloco de Notas, Word, etc.)</li>
+                            <li>Salve o arquivo com a extensão .txt ou .doc</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Botões de Ação -->
+                <div class="flex justify-center gap-4">
+                    <button class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg"
+                        onclick="goBackToEvaluation()">
+                        Voltar à Avaliação
+                    </button>
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg"
+                        onclick="startNewEvaluation()">
+                        Nova Avaliação
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Emojis -->
+    <div id="emojiModal"
+        class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="modal-content bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-4 p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Escolha um ícone</h3>
+                <button type="button" class="text-gray-500 hover:text-gray-700" onclick="closeEmojiModal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Barra de Pesquisa -->
+            <div class="mb-4">
+                <input type="text" id="emojiSearch"
+                    class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Buscar ícones...">
+            </div>
+
+            <!-- Categorias -->
+            <div class="flex flex-wrap gap-2 mb-4">
+                <button type="button" class="category-button active px-3 py-1 rounded-lg text-sm"
+                    data-category="all">Todos</button>
+                <button type="button" class="category-button px-3 py-1 rounded-lg text-sm"
+                    data-category="animals">Animais</button>
+                <button type="button" class="category-button px-3 py-1 rounded-lg text-sm"
+                    data-category="food">Alimentos</button>
+                <button type="button" class="category-button px-3 py-1 rounded-lg text-sm"
+                    data-category="objects">Objetos</button>
+                <button type="button" class="category-button px-3 py-1 rounded-lg text-sm"
+                    data-category="nature">Natureza</button>
+                <button type="button" class="category-button px-3 py-1 rounded-lg text-sm"
+                    data-category="transport">Transporte</button>
+                <button type="button" class="category-button px-3 py-1 rounded-lg text-sm"
+                    data-category="faces">Rostos</button>
+            </div>
+
+            <!-- Grid de Emojis -->
+            <div class="emoji-grid mb-4" id="emojiGrid">
+                <!-- Emojis serão inseridos aqui via JavaScript -->
+            </div>
+
+            <!-- Botões de Ação -->
+            <div class="flex justify-end gap-3">
+                <button type="button" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg"
+                    onclick="closeEmojiModal()">
+                    Cancelar
+                </button>
+                <button type="button" id="selectEmojiBtn"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
+                    Selecionar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Visualização -->
+    <div id="previewModal"
+        class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="modal-content bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-4 p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Visualização das Palavras</h3>
+                <button type="button" class="text-gray-500 hover:text-gray-700" onclick="closePreviewModal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="mb-6">
+                <p class="text-gray-600">Estas são as palavras e ícones que serão apresentados para a criança:</p>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-blue-50 p-4 rounded-xl flex flex-col items-center">
+                    <div class="text-4xl mb-2" id="preview-emoji-0">💬</div>
+                    <div class="font-bold text-center" id="preview-word-0">Palavra 1</div>
+                </div>
+                <div class="bg-blue-50 p-4 rounded-xl flex flex-col items-center">
+                    <div class="text-4xl mb-2" id="preview-emoji-1">💬</div>
+                    <div class="font-bold text-center" id="preview-word-1">Palavra 2</div>
+                </div>
+                <div class="bg-blue-50 p-4 rounded-xl flex flex-col items-center">
+                    <div class="text-4xl mb-2" id="preview-emoji-2">💬</div>
+                    <div class="font-bold text-center" id="preview-word-2">Palavra 3</div>
+                </div>
+                <div class="bg-blue-50 p-4 rounded-xl flex flex-col items-center">
+                    <div class="text-4xl mb-2" id="preview-emoji-3">💬</div>
+                    <div class="font-bold text-center" id="preview-word-3">Palavra 4</div>
+                </div>
+            </div>
+
+            <div class="flex justify-end">
+                <button type="button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg"
+                    onclick="closePreviewModal()">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dados dos emojis por categoria
+        const emojiData = {
+            animals: [
+                { emoji: "🐶", name: "cachorro" },
+                { emoji: "🐱", name: "gato" },
+                { emoji: "🐭", name: "rato" },
+                { emoji: "🐹", name: "hamster" },
+                { emoji: "🐰", name: "coelho" },
+                { emoji: "🦊", name: "raposa" },
+                { emoji: "🐻", name: "urso" },
+                { emoji: "🐼", name: "panda" },
+                { emoji: "🐨", name: "coala" },
+                { emoji: "🐯", name: "tigre" },
+                { emoji: "🦁", name: "leão" },
+                { emoji: "🐮", name: "vaca" },
+                { emoji: "🐷", name: "porco" },
+                { emoji: "🐸", name: "sapo" },
+                { emoji: "🐵", name: "macaco" },
+                { emoji: "🐔", name: "galinha" },
+                { emoji: "🐧", name: "pinguim" },
+                { emoji: "🐦", name: "pássaro" },
+                { emoji: "🦆", name: "pato" },
+                { emoji: "🦉", name: "coruja" }
+            ],
+            food: [
+                { emoji: "🍎", name: "maçã" },
+                { emoji: "🍐", name: "pera" },
+                { emoji: "🍊", name: "laranja" },
+                { emoji: "🍋", name: "limão" },
+                { emoji: "🍌", name: "banana" },
+                { emoji: "🍉", name: "melancia" },
+                { emoji: "🍇", name: "uva" },
+                { emoji: "🍓", name: "morango" },
+                { emoji: "🍈", name: "melão" },
+                { emoji: "🍒", name: "cereja" },
+                { emoji: "🍑", name: "pêssego" },
+                { emoji: "🥭", name: "manga" },
+                { emoji: "🍍", name: "abacaxi" },
+                { emoji: "🥥", name: "coco" },
+                { emoji: "🥝", name: "kiwi" },
+                { emoji: "🍅", name: "tomate" },
+                { emoji: "🥑", name: "abacate" },
+                { emoji: "🍆", name: "berinjela" },
+                { emoji: "🥔", name: "batata" },
+                { emoji: "🥕", name: "cenoura" }
+            ],
+            objects: [
+                { emoji: "⌚", name: "relógio" },
+                { emoji: "📱", name: "celular" },
+                { emoji: "💻", name: "laptop" },
+                { emoji: "⌨️", name: "teclado" },
+                { emoji: "🖥️", name: "computador" },
+                { emoji: "🖨️", name: "impressora" },
+                { emoji: "🖱️", name: "mouse" },
+                { emoji: "📷", name: "câmera" },
+                { emoji: "📸", name: "câmera" },
+                { emoji: "📹", name: "filmadora" },
+                { emoji: "🎥", name: "câmera de cinema" },
+                { emoji: "📞", name: "telefone" },
+                { emoji: "☎️", name: "telefone" },
+                { emoji: "📺", name: "televisão" },
+                { emoji: "📻", name: "rádio" },
+                { emoji: "🎙️", name: "microfone" },
+                { emoji: "⏰", name: "despertador" },
+                { emoji: "💡", name: "lâmpada" },
+                { emoji: "🔦", name: "lanterna" },
+                { emoji: "🕯️", name: "vela" }
+            ],
+            nature: [
+                { emoji: "🌍", name: "terra" },
+                { emoji: "🌎", name: "terra" },
+                { emoji: "🌏", name: "terra" },
+                { emoji: "🌕", name: "lua cheia" },
+                { emoji: "🌙", name: "lua crescente" },
+                { emoji: "☀️", name: "sol" },
+                { emoji: "⭐", name: "estrela" },
+                { emoji: "🌟", name: "estrela brilhante" },
+                { emoji: "🌠", name: "estrela cadente" },
+                { emoji: "☁️", name: "nuvem" },
+                { emoji: "⛅", name: "sol atrás da nuvem" },
+                { emoji: "🌈", name: "arco-íris" },
+                { emoji: "☂️", name: "guarda-chuva" },
+                { emoji: "☔", name: "guarda-chuva com gotas de chuva" },
+                { emoji: "⚡", name: "alta tensão" },
+                { emoji: "❄️", name: "floco de neve" },
+                { emoji: "☃️", name: "boneco de neve" },
+                { emoji: "🔥", name: "fogo" },
+                { emoji: "💧", name: "gota" },
+                { emoji: "🌊", name: "onda" }
+            ],
+            transport: [
+                { emoji: "🚗", name: "carro" },
+                { emoji: "🚕", name: "táxi" },
+                { emoji: "🚙", name: "utilitário" },
+                { emoji: "🚌", name: "ônibus" },
+                { emoji: "🚎", name: "trólebus" },
+                { emoji: "🏎️", name: "carro de corrida" },
+                { emoji: "🚓", name: "carro de polícia" },
+                { emoji: "🚑", name: "ambulância" },
+                { emoji: "🚒", name: "caminhão de bombeiros" },
+                { emoji: "🚐", name: "van" },
+                { emoji: "🚚", name: "caminhão de entrega" },
+                { emoji: "🚛", name: "caminhão articulado" },
+                { emoji: "🚜", name: "trator" },
+                { emoji: "🛴", name: "patinete" },
+                { emoji: "🚲", name: "bicicleta" },
+                { emoji: "🛵", name: "scooter" },
+                { emoji: "🏍️", name: "motocicleta" },
+                { emoji: "✈️", name: "avião" },
+                { emoji: "🛫", name: "avião decolando" },
+                { emoji: "🛬", name: "avião pousando" }
+            ],
+            faces: [
+                { emoji: "😀", name: "rosto sorridente" },
+                { emoji: "😃", name: "rosto sorridente com olhos grandes" },
+                { emoji: "😄", name: "rosto sorridente com olhos sorridentes" },
+                { emoji: "😁", name: "rosto radiante com olhos sorridentes" },
+                { emoji: "😆", name: "rosto sorridente com olhos fechados" },
+                { emoji: "😅", name: "rosto sorridente com suor" },
+                { emoji: "😂", name: "rosto com lágrimas de alegria" },
+                { emoji: "🤣", name: "rolando de rir" },
+                { emoji: "😊", name: "rosto sorridente com olhos sorridentes" },
+                { emoji: "😇", name: "rosto sorridente com auréola" },
+                { emoji: "🙂", name: "rosto levemente sorridente" },
+                { emoji: "🙃", name: "rosto de cabeça para baixo" },
+                { emoji: "😉", name: "rosto piscando" },
+                { emoji: "😌", name: "rosto aliviado" },
+                { emoji: "😍", name: "rosto sorridente com olhos de coração" },
+                { emoji: "🥰", name: "rosto sorridente com corações" },
+                { emoji: "😘", name: "rosto mandando beijo" },
+                { emoji: "😗", name: "rosto beijando" },
+                { emoji: "😙", name: "rosto beijando com olhos sorridentes" },
+                { emoji: "😚", name: "rosto beijando com olhos fechados" }
+            ]
+        };
+
+        // Variáveis globais
+        let currentEmojiIndex = 0;
+        let selectedEmoji = null;
+        let selectedEmojis = ['💬', '💬', '💬', '💬'];
+        let wordsData = null;
+        let currentWordIndex = 0;
+        let wordAnalyses = [];
+
+        // Inicialização quando a página carrega
+        document.addEventListener('DOMContentLoaded', function () {
+            // Configurar event listeners para botões de emoji
+            const emojiButtons = document.querySelectorAll('.emoji-button');
+            emojiButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    openEmojiModal(index);
+                });
+            });
+
+            // Configurar event listeners para previews de emoji
+            const emojiPreviews = document.querySelectorAll('.emoji-preview');
+            emojiPreviews.forEach(preview => {
+                preview.addEventListener('click', function () {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    openEmojiModal(index);
+                });
+            });
+
+            // Configurar botão de visualização
+            document.getElementById('previewBtn').addEventListener('click', openPreviewModal);
+
+            // Configurar botão próximo
+            document.getElementById('nextBtn').addEventListener('click', function () {
+                if (validateForm()) {
+                    showAnalysisScreen();
+                }
+            });
+
+            // Configurar botão de seleção de emoji
+            document.getElementById('selectEmojiBtn').addEventListener('click', function () {
+                if (selectedEmoji) {
+                    selectedEmojis[currentEmojiIndex] = selectedEmoji;
+                    document.querySelector(`[data-index="${currentEmojiIndex}"].emoji-preview`).textContent = selectedEmoji;
+                    closeEmojiModal();
+                }
+            });
+
+            // Configurar botão de copiar relatório
+            document.getElementById('copy-report-btn').addEventListener('click', copyReportToClipboard);
+
+            // Configurar categorias de emoji
+            const categoryButtons = document.querySelectorAll('.category-button');
+            categoryButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    // Remover classe active de todos os botões
+                    categoryButtons.forEach(btn => btn.classList.remove('active'));
+                    // Adicionar classe active ao botão clicado
+                    this.classList.add('active');
+
+                    const category = this.getAttribute('data-category');
+                    populateEmojiGrid(category);
+                });
+            });
+
+            // Configurar busca de emoji
+            document.getElementById('emojiSearch').addEventListener('input', function () {
+                const searchTerm = this.value;
+                const activeCategory = document.querySelector('.category-button.active').getAttribute('data-category');
+                populateEmojiGrid(activeCategory, searchTerm);
+            });
+
+            // Configurar botões da tela de análise
+            document.getElementById('analyze-btn').addEventListener('click', analyzeCurrentWord);
+            document.getElementById('next-word-btn').addEventListener('click', nextWord);
+            document.getElementById('finish-btn').addEventListener('click', showEvaluationScreen);
+
+            // Popular grid inicial de emojis
+            populateEmojiGrid('all');
+        });
+
+        // Função para validar o formulário
+        function validateForm() {
+            const words = [
+                document.getElementById('word1').value.trim(),
+                document.getElementById('word2').value.trim(),
+                document.getElementById('word3').value.trim(),
+                document.getElementById('word4').value.trim()
+            ];
+
+            for (let i = 0; i < words.length; i++) {
+                if (!words[i]) {
+                    alert(`Por favor, preencha a Palavra ${i + 1}`);
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        // Função para abrir o modal de emojis
+        function openEmojiModal(index) {
+            currentEmojiIndex = index;
+            selectedEmoji = null;
+
+            // Limpar seleção anterior
+            const emojiItems = document.querySelectorAll('.emoji-item');
+            emojiItems.forEach(item => {
+                item.classList.remove('emoji-selected');
+            });
+
+            // Mostrar o modal
+            document.getElementById('emojiModal').classList.remove('hidden');
+            document.getElementById('emojiModal').classList.add('modal-active');
+
+            // Focar na barra de pesquisa
+            document.getElementById('emojiSearch').focus();
+        }
+
+        // Função para fechar o modal de emojis
+        function closeEmojiModal() {
+            document.getElementById('emojiModal').classList.add('hidden');
+            document.getElementById('emojiModal').classList.remove('modal-active');
+        }
+
+        // Função para abrir o modal de visualização
+        function openPreviewModal() {
+            // Atualizar os dados de visualização
+            for (let i = 0; i < 4; i++) {
+                const wordInput = document.getElementById(`word${i + 1}`);
+                const previewWord = document.getElementById(`preview-word-${i}`);
+                const previewEmoji = document.getElementById(`preview-emoji-${i}`);
+
+                previewWord.textContent = wordInput.value || `Palavra ${i + 1}`;
+                previewEmoji.textContent = selectedEmojis[i];
+            }
+
+            // Mostrar o modal
+            document.getElementById('previewModal').classList.remove('hidden');
+            document.getElementById('previewModal').classList.add('modal-active');
+        }
+
+        // Função para fechar o modal de visualização
+        function closePreviewModal() {
+            document.getElementById('previewModal').classList.add('hidden');
+            document.getElementById('previewModal').classList.remove('modal-active');
+        }
+
+        // Função para popular o grid de emojis
+        function populateEmojiGrid(category = 'all', searchTerm = '') {
+            const emojiGrid = document.getElementById('emojiGrid');
+            emojiGrid.innerHTML = '';
+
+            // Determinar quais emojis mostrar com base na categoria e termo de pesquisa
+            let emojisToShow = [];
+
+            if (category === 'all') {
+                // Combinar todos os emojis de todas as categorias
+                Object.values(emojiData).forEach(categoryEmojis => {
+                    emojisToShow = emojisToShow.concat(categoryEmojis);
+                });
+            } else {
+                emojisToShow = emojiData[category] || [];
+            }
+
+            // Filtrar por termo de pesquisa, se houver
+            if (searchTerm) {
+                const searchTermLower = searchTerm.toLowerCase();
+                emojisToShow = emojisToShow.filter(emoji =>
+                    emoji.name.toLowerCase().includes(searchTermLower)
+                );
+            }
+
+            // Adicionar emojis ao grid
+            emojisToShow.forEach(emoji => {
+                const emojiItem = document.createElement('div');
+                emojiItem.className = 'emoji-item';
+                emojiItem.textContent = emoji.emoji;
+                emojiItem.title = emoji.name;
+
+                emojiItem.addEventListener('click', function () {
+                    // Remover seleção anterior
+                    document.querySelectorAll('.emoji-item').forEach(item => {
+                        item.classList.remove('emoji-selected');
+                    });
+
+                    // Adicionar seleção ao item clicado
+                    this.classList.add('emoji-selected');
+                    selectedEmoji = emoji.emoji;
+                });
+
+                emojiGrid.appendChild(emojiItem);
+            });
+        }
+
+        // Função para mostrar a tela de análise
+        function showAnalysisScreen() {
+            // Esconder tela de entrada
+            document.getElementById('input-screen').classList.remove('active');
+
+            // Mostrar tela de análise
+            document.getElementById('analysis-screen').classList.add('active');
+
+            // Inicializar a tela de análise
+            initializeAnalysisScreen();
+        }
+
+        // Função para voltar à tela de entrada
+        function goBackToInput() {
+            // Esconder tela de análise
+            document.getElementById('analysis-screen').classList.remove('active');
+
+            // Mostrar tela de entrada
+            document.getElementById('input-screen').classList.add('active');
+        }
+
+        // Função para inicializar a tela de análise
+        function initializeAnalysisScreen() {
+            // Obter dados das palavras
+            const words = [
+                document.getElementById('word1').value.trim().toUpperCase(),
+                document.getElementById('word2').value.trim().toUpperCase(),
+                document.getElementById('word3').value.trim().toUpperCase(),
+                document.getElementById('word4').value.trim().toUpperCase()
+            ];
+
+            wordsData = {
+                words: words,
+                emojis: selectedEmojis
+            };
+
+            // Resetar variáveis
+            currentWordIndex = 0;
+            wordAnalyses = [];
+
+            // Mostrar primeira palavra
+            showCurrentWord();
+        }
+
+        // Função para mostrar a palavra atual
+        function showCurrentWord() {
+            const currentEmoji = document.getElementById('current-emoji');
+            const currentWordTitle = document.getElementById('current-word-title');
+            const progressText = document.getElementById('progress-text');
+            const progressBar = document.getElementById('progress-bar');
+
+            // Atualizar emoji e título
+            currentEmoji.textContent = wordsData.emojis[currentWordIndex];
+            currentWordTitle.textContent = `Palavra ${currentWordIndex + 1}`;
+
+            // Atualizar progresso
+            progressText.textContent = `${currentWordIndex + 1}/4 palavras`;
+            const progressPercentage = ((currentWordIndex + 1) / 4) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+
+            // Criar inputs para a palavra atual
+            createLetterInputsForCurrentWord();
+
+            // Esconder análise e botões de navegação
+            document.getElementById('current-analysis').classList.add('hidden');
+            document.getElementById('navigation-buttons').classList.add('hidden');
+            document.getElementById('analyze-btn').classList.remove('hidden');
+        }
+
+        // Função para criar inputs de letras para a palavra atual
+        function createLetterInputsForCurrentWord() {
+            const word = wordsData.words[currentWordIndex];
+            const container = document.getElementById('current-letter-inputs');
+            container.innerHTML = '';
+
+            for (let i = 0; i < word.length; i++) {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'letter-input';
+                input.maxLength = 1;
+                input.setAttribute('data-letter-index', i);
+
+                // Adicionar event listener para navegação automática
+                input.addEventListener('input', function () {
+                    this.value = this.value.toUpperCase();
+
+                    // Mover para o próximo input
+                    const nextInput = this.nextElementSibling;
+                    if (nextInput && nextInput.classList.contains('letter-input')) {
+                        nextInput.focus();
+                    }
+                });
+
+                // Adicionar event listener para backspace
+                input.addEventListener('keydown', function (e) {
+                    if (e.key === 'Backspace' && this.value === '') {
+                        const prevInput = this.previousElementSibling;
+                        if (prevInput && prevInput.classList.contains('letter-input')) {
+                            prevInput.focus();
+                        }
+                    }
+                });
+
+                container.appendChild(input);
+            }
+
+            // Focar no primeiro input
+            if (container.firstChild) {
+                container.firstChild.focus();
+            }
+        }
+
+        // Função para analisar a palavra atual
+        function analyzeCurrentWord() {
+            const word = wordsData.words[currentWordIndex];
+            const inputs = document.querySelectorAll('#current-letter-inputs .letter-input');
+            let userWord = '';
+
+            // Coletar letras digitadas
+            inputs.forEach(input => {
+                userWord += input.value.toUpperCase() || '_';
+            });
+
+            // Comparar com a palavra correta
+            let correctLetters = 0;
+            inputs.forEach((input, index) => {
+                const userLetter = input.value.toUpperCase();
+                const correctLetter = word[index];
+
+                if (userLetter === correctLetter) {
+                    input.classList.add('correct');
+                    input.classList.remove('incorrect');
+                    correctLetters++;
+                } else if (userLetter) {
+                    input.classList.add('incorrect');
+                    input.classList.remove('correct');
+                } else {
+                    input.classList.remove('correct', 'incorrect');
+                }
+            });
+
+            // Analisar padrões silábicos
+            const vowels = ['A', 'E', 'I', 'O', 'U', 'Á', 'É', 'Í', 'Ó', 'Ú', 'Â', 'Ê', 'Î', 'Ô', 'Û', 'Ã', 'Õ'];
+            const consonants = ['B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z', 'Ç'];
+
+            // Contar vogais e consoantes na palavra correta
+            const wordVowels = [...word].filter(letter => vowels.includes(letter));
+            const wordConsonants = [...word].filter(letter => consonants.includes(letter));
+
+            // Contar vogais e consoantes na palavra do usuário que estão na palavra correta
+            const userLetters = [...userWord].filter(letter => letter !== '_');
+            const userVowelsInWord = userLetters.filter(letter => vowels.includes(letter) && word.includes(letter));
+            const userConsonantsInWord = userLetters.filter(letter => consonants.includes(letter) && word.includes(letter));
+
+            // Calcular proporções
+            const vowelMatch = wordVowels.length > 0 ? userVowelsInWord.length / wordVowels.length : 0;
+            const consonantMatch = wordConsonants.length > 0 ? userConsonantsInWord.length / wordConsonants.length : 0;
+
+            // Calcular precisão e hipótese
+            const accuracy = Math.round((correctLetters / word.length) * 100);
+            let hypothesis = '';
+            let hypothesisClass = '';
+            let hypothesisDetail = '';
+
+            // Determinar hipótese com base nos critérios
+            if (accuracy >= 90) {
+                hypothesis = 'Alfabética';
+                hypothesisClass = 'hypothesis-alfabetica';
+            } else if (accuracy >= 70 || (vowelMatch >= 0.7 && consonantMatch >= 0.5)) {
+                hypothesis = 'Silábico-Alfabética';
+                hypothesisClass = 'hypothesis-silabico-alfabetica';
+
+                // Determinar se é com valor de vogal ou consoante
+                if (vowelMatch > consonantMatch) {
+                    hypothesisDetail = 'com valor de vogal';
+                } else if (consonantMatch > vowelMatch) {
+                    hypothesisDetail = 'com valor de consoante';
+                } else if (vowelMatch > 0 && consonantMatch > 0 && vowelMatch === consonantMatch) {
+                    hypothesisDetail = 'com valor de vogal e consoante';
+                }
+            } else if (accuracy >= 40 || vowelMatch >= 0.5 || consonantMatch >= 0.5) {
+                hypothesis = 'Silábica';
+                hypothesisClass = 'hypothesis-silabica';
+
+                // Determinar se é com valor de vogal ou consoante
+                if (vowelMatch > consonantMatch) {
+                    hypothesisDetail = 'com valor de vogal';
+                } else if (consonantMatch > vowelMatch) {
+                    hypothesisDetail = 'com valor de consoante';
+                } else if (vowelMatch > 0 && consonantMatch > 0 && vowelMatch === consonantMatch) {
+                    hypothesisDetail = 'com valor de vogal e consoante';
+                }
+            } else {
+                hypothesis = 'Pré-Silábica';
+                hypothesisClass = 'hypothesis-pre-silabica';
+            }
+
+            // Armazenar análise
+            wordAnalyses[currentWordIndex] = {
+                word: word,
+                userWord: userWord,
+                accuracy: accuracy,
+                hypothesis: hypothesis,
+                hypothesisDetail: hypothesisDetail,
+                hypothesisClass: hypothesisClass,
+                correctLetters: correctLetters,
+                totalLetters: word.length,
+                vowelMatch: Math.round(vowelMatch * 100),
+                consonantMatch: Math.round(consonantMatch * 100)
+            };
+
+            // Mostrar análise
+            const analysisDiv = document.getElementById('current-analysis');
+            analysisDiv.classList.remove('hidden');
+
+            let hypothesisText = hypothesis;
+            if (hypothesisDetail) {
+                hypothesisText += ` (${hypothesisDetail})`;
+            }
+
+            analysisDiv.innerHTML = `
+                <div class="bg-blue-50 p-6 rounded-lg">
+                    <h4 class="font-bold text-gray-800 mb-4 text-xl">Análise da Palavra</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+                        <div>
+                            <p class="mb-2"><strong>Palavra correta:</strong> ${word}</p>
+                            <p class="mb-2"><strong>Palavra digitada:</strong> ${userWord}</p>
+                        </div>
+                        <div>
+                            <p class="mb-2"><strong>Precisão:</strong> ${accuracy}%</p>
+                            <p><strong>Hipótese:</strong> <span class="inline-block px-3 py-1 rounded-full text-sm font-bold ${hypothesisClass}">${hypothesisText}</span></p>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-sm text-gray-600">
+                        <p>Correspondência de vogais: ${wordAnalyses[currentWordIndex].vowelMatch}%</p>
+                        <p>Correspondência de consoantes: ${wordAnalyses[currentWordIndex].consonantMatch}%</p>
+                    </div>
+                </div>
+            `;
+
+            // Esconder botão analisar e mostrar navegação
+            document.getElementById('analyze-btn').classList.add('hidden');
+
+            if (currentWordIndex < 3) {
+                document.getElementById('navigation-buttons').classList.remove('hidden');
+            } else {
+                document.getElementById('finish-btn').classList.remove('hidden');
+            }
+        }
+
+        // Função para ir para a próxima palavra
+        function nextWord() {
+            if (currentWordIndex < 3) {
+                currentWordIndex++;
+                showCurrentWord();
+            }
+        }
+
+        // Função para mostrar a tela de avaliação
+        function showEvaluationScreen() {
+            // Esconder tela de análise
+            document.getElementById('analysis-screen').classList.remove('active');
+
+            // Mostrar tela de avaliação
+            document.getElementById('evaluation-screen').classList.add('active');
+
+            // Gerar avaliação final
+            generateFinalEvaluation();
+        }
+
+        // Função para gerar a avaliação final
+        function generateFinalEvaluation() {
+            // Calcular estatísticas gerais
+            const totalCorrectLetters = wordAnalyses.reduce((sum, analysis) => sum + analysis.correctLetters, 0);
+            const totalLetters = wordAnalyses.reduce((sum, analysis) => sum + analysis.totalLetters, 0);
+            const overallAccuracy = Math.round((totalCorrectLetters / totalLetters) * 100);
+
+            // Determinar hipótese predominante
+            const hypothesisCounts = {
+                'Pré-Silábica': 0,
+                'Silábica': 0,
+                'Silábico-Alfabética': 0,
+                'Alfabética': 0
+            };
+
+            wordAnalyses.forEach(analysis => {
+                hypothesisCounts[analysis.hypothesis]++;
+            });
+
+            const predominantHypothesis = Object.keys(hypothesisCounts).reduce((a, b) =>
+                hypothesisCounts[a] > hypothesisCounts[b] ? a : b
+            );
+
+            // Atualizar interface
+            updateFinalHypothesis(predominantHypothesis, overallAccuracy);
+            // Não mostrar detalhes da análise por palavra até que a senha seja inserida
+            // updateWordAnalysisDetails(); - Removido daqui
+            updateHypothesisDistribution(hypothesisCounts);
+            updateRecommendations(predominantHypothesis);
+
+            // Configurar verificação de senha
+            setupPasswordVerification();
+        }
+
+        // Função para configurar verificação de senha
+        function setupPasswordVerification() {
+            const adminPassword = "jugra"; // Senha administrativa
+
+            // Configurar botão de desbloqueio
+            document.getElementById('unlock-analysis-btn').addEventListener('click', function () {
+                document.getElementById('password-area').classList.remove('hidden');
+                document.getElementById('admin-password').focus();
+            });
+
+            // Configurar botão de verificação de senha
+            document.getElementById('submit-password-btn').addEventListener('click', function () {
+                verifyPassword();
+            });
+
+            // Permitir pressionar Enter para verificar senha
+            document.getElementById('admin-password').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    verifyPassword();
+                }
+            });
+
+            // Função para verificar senha
+            function verifyPassword() {
+                const passwordInput = document.getElementById('admin-password');
+                const passwordError = document.getElementById('password-error');
+
+                if (passwordInput.value === adminPassword) {
+                    // Senha correta
+                    document.getElementById('password-area').classList.add('hidden');
+                    document.getElementById('word-analysis-details').classList.remove('hidden');
+                    document.getElementById('unlock-analysis-btn').classList.add('hidden');
+
+                    // Mostrar mensagem de sucesso temporária
+                    const successMessage = document.createElement('div');
+                    successMessage.className = 'bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded';
+                    successMessage.innerHTML = '<p class="font-bold">Acesso liberado!</p><p>Detalhes da análise por palavra disponíveis.</p>';
+
+                    const wordAnalysisDetails = document.getElementById('word-analysis-details');
+                    wordAnalysisDetails.parentNode.insertBefore(successMessage, wordAnalysisDetails);
+
+                    // Remover mensagem após 3 segundos
+                    setTimeout(() => {
+                        successMessage.remove();
+                    }, 3000);
+
+                    // Agora podemos mostrar os detalhes da análise
+                    updateWordAnalysisDetails();
+                } else {
+                    // Senha incorreta
+                    passwordError.classList.remove('hidden');
+                    passwordInput.value = '';
+                    passwordInput.focus();
+
+                    // Esconder mensagem de erro após 3 segundos
+                    setTimeout(() => {
+                        passwordError.classList.add('hidden');
+                    }, 3000);
+                }
+            }
+        }
+
+        // Função para atualizar a hipótese final
+        function updateFinalHypothesis(hypothesis, accuracy) {
+            const badge = document.getElementById('final-hypothesis-badge');
+            const description = document.getElementById('hypothesis-description');
+            const accuracySpan = document.getElementById('overall-accuracy');
+            const progressBar = document.getElementById('overall-progress-bar');
+
+            // Configurar badge
+            let badgeClass = '';
+            let descriptionText = '';
+
+            // Determinar se há um padrão predominante de valor (vogal ou consoante)
+            let predominantDetail = '';
+            const detailCounts = {
+                'com valor de vogal': 0,
+                'com valor de consoante': 0
+            };
+
+            wordAnalyses.forEach(analysis => {
+                if (analysis.hypothesis === hypothesis && analysis.hypothesisDetail) {
+                    detailCounts[analysis.hypothesisDetail]++;
+                }
+            });
+
+            if (detailCounts['com valor de vogal'] > detailCounts['com valor de consoante']) {
+                predominantDetail = 'com valor de vogal';
+            } else if (detailCounts['com valor de consoante'] > detailCounts['com valor de vogal']) {
+                predominantDetail = 'com valor de consoante';
+            }
+
+            switch (hypothesis) {
+                case 'Pré-Silábica':
+                    badgeClass = 'hypothesis-pre-silabica';
+                    descriptionText = 'O aluno ainda não compreende que a escrita representa os sons da fala. Utiliza letras ou símbolos de forma aleatória.';
+                    break;
+                case 'Silábica':
+                    badgeClass = 'hypothesis-silabica';
+                    descriptionText = 'O aluno compreende que a escrita representa a fala e usa uma letra para cada sílaba da palavra.';
+                    if (predominantDetail === 'com valor de vogal') {
+                        descriptionText += ' Há uma tendência a utilizar vogais para representar as sílabas.';
+                    } else if (predominantDetail === 'com valor de consoante') {
+                        descriptionText += ' Há uma tendência a utilizar consoantes para representar as sílabas.';
+                    } else if (predominantDetail === 'com valor de vogal e consoante') {
+                        descriptionText += ' Utiliza tanto vogais quanto consoantes para representar as sílabas.';
+                    }
+                    break;
+                case 'Silábico-Alfabética':
+                    badgeClass = 'hypothesis-silabico-alfabetica';
+                    descriptionText = 'O aluno está em transição, ora escreve uma letra por sílaba, ora escreve mais letras.';
+                    if (predominantDetail === 'com valor de vogal') {
+                        descriptionText += ' Demonstra maior facilidade em identificar as vogais nas palavras.';
+                    } else if (predominantDetail === 'com valor de consoante') {
+                        descriptionText += ' Demonstra maior facilidade em identificar as consoantes nas palavras.';
+                    } else if (predominantDetail === 'com valor de vogal e consoante') {
+                        descriptionText += ' Demonstra equilíbrio na identificação de vogais e consoantes nas palavras.';
+                    }
+                    break;
+                case 'Alfabética':
+                    badgeClass = 'hypothesis-alfabetica';
+                    descriptionText = 'O aluno compreende que cada letra representa um som da fala, escrevendo de forma alfabética.';
+                    break;
+            }
+
+            let displayText = hypothesis;
+            if (predominantDetail && (hypothesis === 'Silábica' || hypothesis === 'Silábico-Alfabética')) {
+                displayText += ` (${predominantDetail})`;
+            }
+
+            badge.className = `inline-block px-6 py-3 rounded-full text-xl font-bold mb-4 ${badgeClass}`;
+            badge.textContent = displayText;
+            description.textContent = descriptionText;
+            accuracySpan.textContent = `${accuracy}%`;
+            progressBar.style.width = `${accuracy}%`;
+        }
+
+        // Função para atualizar detalhes da análise por palavra
+        function updateWordAnalysisDetails() {
+            const container = document.getElementById('word-analysis-details');
+            container.innerHTML = '';
+
+            wordAnalyses.forEach((analysis, index) => {
+                const wordDiv = document.createElement('div');
+                wordDiv.className = 'bg-gray-50 p-4 rounded-lg';
+
+                let hypothesisText = analysis.hypothesis;
+                if (analysis.hypothesisDetail) {
+                    hypothesisText += ` (${analysis.hypothesisDetail})`;
+                }
+
+                wordDiv.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <h4 class="font-bold text-gray-800">Palavra ${index + 1}: ${analysis.word}</h4>
+                        <span class="text-sm font-medium text-gray-600">${analysis.accuracy}%</span>
+                    </div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm text-gray-600">Escrita: ${analysis.userWord}</span>
+                        <span class="inline-block px-2 py-1 rounded text-xs font-bold ${analysis.hypothesisClass}">${hypothesisText}</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                        <div class="h-2 rounded-full bg-gradient-to-r from-blue-400 to-green-500" style="width: ${analysis.accuracy}%"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-xs text-gray-600">
+                        <div>
+                            <span>Vogais: ${analysis.vowelMatch}%</span>
+                            <div class="w-full bg-gray-200 rounded-full h-1">
+                                <div class="h-1 rounded-full bg-blue-400" style="width: ${analysis.vowelMatch}%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <span>Consoantes: ${analysis.consonantMatch}%</span>
+                            <div class="w-full bg-gray-200 rounded-full h-1">
+                                <div class="h-1 rounded-full bg-green-400" style="width: ${analysis.consonantMatch}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(wordDiv);
+            });
+        }
+
+        // Função para atualizar distribuição de hipóteses
+        function updateHypothesisDistribution(counts) {
+            const container = document.getElementById('hypothesis-distribution');
+            container.innerHTML = '';
+
+            const hypotheses = [
+                { name: 'Pré-Silábica', class: 'hypothesis-pre-silabica' },
+                { name: 'Silábica', class: 'hypothesis-silabica' },
+                { name: 'Silábico-Alfabética', class: 'hypothesis-silabico-alfabetica' },
+                { name: 'Alfabética', class: 'hypothesis-alfabetica' }
+            ];
+
+            hypotheses.forEach(hypothesis => {
+                const count = counts[hypothesis.name];
+                const percentage = (count / 4) * 100;
+
+                const div = document.createElement('div');
+                div.className = 'flex justify-between items-center';
+                div.innerHTML = `
+                    <span class="text-sm font-medium">${hypothesis.name}</span>
+                    <div class="flex items-center gap-2">
+                        <div class="w-20 bg-gray-200 rounded-full h-2">
+                            <div class="chart-bar h-2 rounded-full ${hypothesis.class}" style="width: ${percentage}%"></div>
+                        </div>
+                        <span class="text-sm text-gray-600 w-8">${count}</span>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // Função para atualizar recomendações
+        function updateRecommendations(hypothesis) {
+            const container = document.getElementById('recommendations');
+            let recommendations = '';
+
+            switch (hypothesis) {
+                case 'Pré-Silábica':
+                    recommendations = `
+                        <h4 class="text-lg font-bold mb-3">Atividades Recomendadas:</h4>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                            <li>Trabalhar com o nome próprio da criança</li>
+                            <li>Explorar letras do alfabeto através de jogos</li>
+                            <li>Atividades de consciência fonológica (rimas, aliterações)</li>
+                            <li>Leitura diária de histórias</li>
+                            <li>Brincadeiras com sons das palavras</li>
+                        </ul>
+                    `;
+                    break;
+                case 'Silábica':
+                    recommendations = `
+                        <h4 class="text-lg font-bold mb-3">Atividades Recomendadas:</h4>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                            <li>Atividades de análise fonêmica</li>
+                            <li>Trabalhar com famílias silábicas</li>
+                            <li>Jogos de formação de palavras</li>
+                            <li>Escrita espontânea com mediação</li>
+                            <li>Comparação entre palavras escritas</li>
+                        </ul>
+                    `;
+                    break;
+                case 'Silábico-Alfabética':
+                    recommendations = `
+                        <h4 class="text-lg font-bold mb-3">Atividades Recomendadas:</h4>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                            <li>Atividades de segmentação de palavras</li>
+                            <li>Jogos com letras móveis</li>
+                            <li>Escrita de listas e textos curtos</li>
+                            <li>Análise de palavras conhecidas</li>
+                            <li>Reescrita de textos memorizados</li>
+                        </ul>
+                    `;
+                    break;
+                case 'Alfabética':
+                    recommendations = `
+                        <h4 class="text-lg font-bold mb-3">Atividades Recomendadas:</h4>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                            <li>Produção de textos diversos</li>
+                            <li>Trabalhar com ortografia</li>
+                            <li>Revisão e reescrita de textos</li>
+                            <li>Leitura de diferentes gêneros textuais</li>
+                            <li>Atividades de interpretação textual</li>
+                        </ul>
+                    `;
+                    break;
+            }
+
+            container.innerHTML = recommendations;
+        }
+
+        // Função para voltar à análise
+        function goBackToAnalysis() {
+            document.getElementById('evaluation-screen').classList.remove('active');
+            document.getElementById('analysis-screen').classList.add('active');
+        }
+
+        // Função para iniciar nova avaliação
+        function startNewEvaluation() {
+            // Resetar todas as variáveis
+            currentWordIndex = 0;
+            wordAnalyses = [];
+            selectedEmojis = ['💬', '💬', '💬', '💬'];
+
+            // Limpar formulário
+            document.getElementById('wordForm').reset();
+
+            // Resetar emojis
+            document.querySelectorAll('.emoji-preview').forEach((preview, index) => {
+                preview.textContent = '💬';
+            });
+
+            // Voltar à primeira tela
+            document.getElementById('evaluation-screen').classList.remove('active');
+            document.getElementById('input-screen').classList.add('active');
+        }
+
+        // Função para mostrar tela de relatório
+        function showReportScreen() {
+            // Esconder tela de avaliação
+            document.getElementById('evaluation-screen').classList.remove('active');
+
+            // Mostrar tela de relatório
+            document.getElementById('report-screen').classList.add('active');
+
+            // Gerar relatório em texto
+            generateTextReport();
+        }
+
+        // Função para voltar à avaliação
+        function goBackToEvaluation() {
+            document.getElementById('report-screen').classList.remove('active');
+            document.getElementById('evaluation-screen').classList.add('active');
+        }
+
+        // Função para gerar relatório em texto
+        function generateTextReport() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('pt-BR');
+            const timeStr = now.toLocaleTimeString('pt-BR');
+
+            // Calcular estatísticas
+            const totalCorrectLetters = wordAnalyses.reduce((sum, analysis) => sum + analysis.correctLetters, 0);
+            const totalLetters = wordAnalyses.reduce((sum, analysis) => sum + analysis.totalLetters, 0);
+            const overallAccuracy = Math.round((totalCorrectLetters / totalLetters) * 100);
+
+            // Determinar hipótese predominante
+            const hypothesisCounts = {
+                'Pré-Silábica': 0,
+                'Silábica': 0,
+                'Silábico-Alfabética': 0,
+                'Alfabética': 0
+            };
+
+            // Contar ocorrências de cada hipótese e detalhes
+            const hypothesisDetails = {
+                'Silábica (com valor de vogal)': 0,
+                'Silábica (com valor de consoante)': 0,
+                'Silábica (com valor de vogal e consoante)': 0,
+                'Silábico-Alfabética (com valor de vogal)': 0,
+                'Silábico-Alfabética (com valor de consoante)': 0,
+                'Silábico-Alfabética (com valor de vogal e consoante)': 0
+            };
+
+            wordAnalyses.forEach(analysis => {
+                hypothesisCounts[analysis.hypothesis]++;
+
+                if (analysis.hypothesisDetail) {
+                    const fullHypothesis = `${analysis.hypothesis} (${analysis.hypothesisDetail})`;
+                    if (hypothesisDetails[fullHypothesis] !== undefined) {
+                        hypothesisDetails[fullHypothesis]++;
+                    }
+                }
+            });
+
+            const predominantHypothesis = Object.keys(hypothesisCounts).reduce((a, b) =>
+                hypothesisCounts[a] > hypothesisCounts[b] ? a : b
+            );
+
+            // Verificar se a análise por palavra foi desbloqueada
+            const isWordAnalysisUnlocked = document.getElementById('word-analysis-details').classList.contains('hidden') === false;
+
+            // Gerar texto do relatório
+            let reportText = `
+RELATÓRIO DE AVALIAÇÃO DA ESCRITA INFANTIL
+==========================================
+
+Data: ${dateStr}
+Horário: ${timeStr}
+
+RESULTADO GERAL
+===============
+Nível de Escrita Identificado: ${predominantHypothesis}
+Precisão Geral: ${overallAccuracy}%
+
+`;
+
+            // Incluir análise detalhada por palavra apenas se estiver desbloqueada
+            if (isWordAnalysisUnlocked) {
+                reportText += `
+ANÁLISE DETALHADA POR PALAVRA
+=============================
+`;
+
+                wordAnalyses.forEach((analysis, index) => {
+                    let hypothesisText = analysis.hypothesis;
+                    if (analysis.hypothesisDetail) {
+                        hypothesisText += ` (${analysis.hypothesisDetail})`;
+                    }
+
+                    reportText += `
+Palavra ${index + 1}: ${analysis.word}
+- Escrita do aluno: ${analysis.userWord}
+- Precisão: ${analysis.accuracy}%
+- Hipótese: ${hypothesisText}
+- Letras corretas: ${analysis.correctLetters}/${analysis.totalLetters}
+- Correspondência de vogais: ${analysis.vowelMatch}%
+- Correspondência de consoantes: ${analysis.consonantMatch}%
+`;
+                });
+            } else {
+                reportText += `
+ANÁLISE DETALHADA POR PALAVRA
+=============================
+[ACESSO RESTRITO] Esta seção requer senha administrativa.
+Para visualizar os detalhes completos, volte à tela de avaliação e desbloqueie a seção "Análise por Palavra".
+
+`;
+            }
+
+            reportText += `
+DISTRIBUIÇÃO DE HIPÓTESES
+========================
+`;
+
+            // Adicionar contagem básica de hipóteses
+            Object.keys(hypothesisCounts).forEach(hypothesis => {
+                const count = hypothesisCounts[hypothesis];
+                const percentage = Math.round((count / 4) * 100);
+                reportText += `${hypothesis}: ${count} palavra(s) - ${percentage}%\n`;
+            });
+
+            // Adicionar detalhes de hipóteses (se houver)
+            let hasDetails = false;
+            Object.keys(hypothesisDetails).forEach(fullHypothesis => {
+                const count = hypothesisDetails[fullHypothesis];
+                if (count > 0) {
+                    hasDetails = true;
+                    const percentage = Math.round((count / 4) * 100);
+                    reportText += `${fullHypothesis}: ${count} palavra(s) - ${percentage}%\n`;
+                }
+            });
+
+            // Adicionar recomendações baseadas na hipótese predominante
+            reportText += `
+RECOMENDAÇÕES PEDAGÓGICAS
+========================
+`;
+
+            switch (predominantHypothesis) {
+                case 'Pré-Silábica':
+                    reportText += `
+O aluno encontra-se no nível Pré-Silábico, onde ainda não compreende que a escrita representa os sons da fala.
+
+Atividades Recomendadas:
+- Trabalhar com o nome próprio da criança
+- Explorar letras do alfabeto através de jogos
+- Atividades de consciência fonológica (rimas, aliterações)
+- Leitura diária de histórias
+- Brincadeiras com sons das palavras
+- Identificação de letras em diferentes contextos
+- Escrita espontânea com mediação do professor
+`;
+                    break;
+                case 'Silábica':
+                    reportText += `
+O aluno encontra-se no nível Silábico, compreendendo que a escrita representa a fala e usando uma letra para cada sílaba.
+
+Atividades Recomendadas:
+- Atividades de análise fonêmica
+- Trabalhar com famílias silábicas
+- Jogos de formação de palavras
+- Escrita espontânea com mediação
+- Comparação entre palavras escritas
+- Análise de palavras com diferentes números de sílabas
+- Atividades de segmentação oral
+`;
+                    break;
+                case 'Silábico-Alfabética':
+                    reportText += `
+O aluno encontra-se no nível Silábico-Alfabético, em transição entre a escrita silábica e alfabética.
+
+Atividades Recomendadas:
+- Atividades de segmentação de palavras
+- Jogos com letras móveis
+- Escrita de listas e textos curtos
+- Análise de palavras conhecidas
+- Reescrita de textos memorizados
+- Comparação entre diferentes escritas da mesma palavra
+- Reflexão sobre a quantidade de letras necessárias
+`;
+                    break;
+                case 'Alfabética':
+                    reportText += `
+O aluno encontra-se no nível Alfabético, compreendendo que cada letra representa um som da fala.
+
+Atividades Recomendadas:
+- Produção de textos diversos
+- Trabalhar com ortografia
+- Revisão e reescrita de textos
+- Leitura de diferentes gêneros textuais
+- Atividades de interpretação textual
+- Estudo de regras ortográficas
+- Ampliação do vocabulário
+`;
+                    break;
+            }
+
+            reportText += `
+OBSERVAÇÕES GERAIS
+==================
+Este relatório foi gerado automaticamente pelo Escrevilândia: A terra da escrita.
+A avaliação baseia-se na teoria da psicogênese da língua escrita de Emilia Ferreiro e Ana Teberosky.
+
+Para uma avaliação mais completa, recomenda-se:
+- Observação contínua do desenvolvimento da criança
+- Aplicação de outras atividades de escrita
+- Análise de produções textuais espontâneas
+- Acompanhamento do progresso ao longo do tempo
+
+Professor(a): _________________________________
+Escola: ______________________________________
+Turma: _______________________________________
+Aluno(a): ____________________________________
+
+Data da próxima avaliação: ___________________
+`;
+
+            // Inserir o texto no textarea
+            document.getElementById('report-text').value = reportText.trim();
+        }
+
+        // Função para copiar relatório para área de transferência
+        function copyReportToClipboard() {
+            const reportText = document.getElementById('report-text');
+            reportText.select();
+            reportText.setSelectionRange(0, 99999); // Para dispositivos móveis
+
+            try {
+                document.execCommand('copy');
+
+                // Feedback visual
+                const button = document.getElementById('copy-report-btn');
+                const originalText = button.innerHTML;
+                button.innerHTML = '✅ Copiado!';
+                button.classList.add('bg-green-600');
+                button.classList.remove('bg-blue-600');
+
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('bg-green-600');
+                    button.classList.add('bg-blue-600');
+                }, 2000);
+
+            } catch (err) {
+                alert('Erro ao copiar. Por favor, selecione o texto manualmente e use Ctrl+C');
+            }
+        }
+    </script>
+    <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'97052521b22aaf0b',t:'MTc1NTM5MTQ4OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
+</body>
+
+</html>
