@@ -462,13 +462,13 @@
 
             selectedPhrases.forEach((frase, phraseIndex) => {
                 for (let pos = 1; pos <= 5; pos++) {
-                    columns[pos].
-                        columns[pos].push({
-                            word: frase[pos - 1],
-                            phrase: phraseIndex,
-                            pos: pos,
-                            fixed: pos === 1
-                        });
+
+                    columns[pos].push({
+                        word: frase[pos - 1],
+                        phrase: phraseIndex,
+                        pos: pos,
+                        fixed: pos === 1
+                    });
 
                 }
             });
