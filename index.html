@@ -425,20 +425,19 @@
         function buildShuffled() {
             shuffled = [];
 
-            // Sorteia 6 frases únicas
-            const selectedPhrases = [];
-            const usedIndexes = new Set();
-            while (selectedPhrases.length < 6 && usedIndexes.size < gamePhrases.length) {
-                const i = Math.floor(Math.random() * gamePhrases.length);
-                if (!usedIndexes.has(i)) {
-                    usedIndexes.add(i);
-                    selectedPhrases.push(gamePhrases[i]);
-                }
-            }
+            // Seleciona 6 frases fixas
+            const selectedPhrases = [
+                ['EU', 'GOSTO', 'DE', 'COMER', 'FRUTAS'],
+                ['O', 'SOL', 'BRILHA', 'NO', 'CÉU'],
+                ['A', 'FLOR', 'É', 'BELA', 'DEMAIS'],
+                ['MEU', 'CÃO', 'LATE', 'BEM', 'ALTO'],
+                ['EU', 'LEIO', 'LIVROS', 'TODO', 'DIA'],
+                ['A', 'ESCOLA', 'É', 'MUITO', 'LEGAL']
+            ];
 
-            // Agrupa palavras por coluna (posição)
+            // Cria colunas com palavras por posição
             const columns = {
-                1: [], // coluna 1 (fixa)
+                1: [], // palavra 1 (fixa por linha)
                 2: [],
                 3: [],
                 4: [],
@@ -456,7 +455,7 @@
                 }
             });
 
-            // Função para embaralhar uma lista
+            // Embaralha colunas 2 a 5
             function shuffleArray(arr) {
                 const copy = [...arr];
                 for (let i = copy.length - 1; i > 0; i--) {
@@ -466,19 +465,21 @@
                 return copy;
             }
 
-            // Embaralha colunas 2 a 5
             for (let col = 2; col <= 5; col++) {
                 columns[col] = shuffleArray(columns[col]);
             }
 
-            // Monta o grid linha por linha
-            for (let i = 0; i < selectedPhrases.length; i++) {
+            // Monta o grid: 6 linhas × 5 colunas
+            for (let row = 0; row < 6; row++) {
                 for (let col = 1; col <= 5; col++) {
-                    const cell = columns[col].find(c => c.phrase === i);
+                    const cell = col === 1
+                        ? columns[col][row] // palavra 1 mantém a linha original
+                        : columns[col][row]; // palavras embaralhadas nas demais colunas
                     shuffled.push(cell);
                 }
             }
         }
+
 
 
 
