@@ -98,6 +98,14 @@
             cursor: pointer;
         }
 
+        .correct-phrase {
+            background-color: #a0ffb0 !important;
+            border: 2px solid #3c9c3c;
+            font-weight: bold;
+            box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+        }
+
+
         .cell.painted {
             color: white;
             border-color: transparent
@@ -454,12 +462,14 @@
 
             selectedPhrases.forEach((frase, phraseIndex) => {
                 for (let pos = 1; pos <= 5; pos++) {
-                    columns[pos].push({
-                        word: frase[pos - 1],
-                        phrase: phraseIndex,
-                        pos: pos,
-                        fixed: pos === 1
-                    });
+                    columns[pos].
+                        columns[pos].push({
+                            word: frase[pos - 1],
+                            phrase: phraseIndex,
+                            pos: pos,
+                            fixed: pos === 1
+                        });
+
                 }
             });
 
@@ -501,7 +511,8 @@
                 const c = document.createElement('div');
                 c.className = 'cell';
                 c.textContent = w.word;
-                c.dataset.p = w.phrase; c.dataset.pos = w.pos;
+                c.dataset.p = w.phrase;
+                c.dataset.pos = w.pos;
                 c.onclick = () => paint(c);
                 g.appendChild(c);
             });
@@ -596,22 +607,38 @@
         function checkSeq(cid) {
             const painted = Array.from(document.querySelectorAll(`.cell.painted[data-cid="${cid}"]`));
             const groups = {};
+
             painted.forEach(c => {
                 const p = c.dataset.p;
                 if (!groups[p]) groups[p] = [];
-                groups[p].push(+c.dataset.pos);
+                groups[p].push({
+                    pos: +c.dataset.pos,
+                    element: c
+                });
             });
+
             for (const p in groups) {
-                const arr = groups[p].sort((a, b) => a - b);
-                if (arr.join(',') === '1,2,3,4,5') {
+                const sorted = groups[p].sort((a, b) => a.pos - b.pos);
+                const positions = sorted.map(x => x.pos);
+                if (positions.join(',') === '1,2,3,4,5') {
                     playerScores[currentPlayer] += 20;
                     $('score1').textContent = playerScores[1];
                     $('score2').textContent = playerScores[2];
+
+                    // 🔥 Destaque visual
+                    sorted.forEach(cell => {
+                        cell.element.classList.add('correct-phrase');
+                    });
+
                     return true;
                 }
             }
+
             return false;
         }
+
+
+
         function switchPlayer() { currentPlayer = currentPlayer === 1 ? 2 : 1; $('currentName').textContent = currentPlayer === 1 ? player1 : player2; }
         function resetGame() {
             selectedColorId = null; blockedColors.clear(); colorUses = {};
