@@ -391,26 +391,37 @@
         let colorUses = {}, blockedColors = new Set();
         let paintedCount = 0, playerScores = { 1: 0, 2: 0 };
         let gamePhrases = [
-            ['EU', 'GOSTO', 'DE', 'COMER', 'FRUTAS'],
-            ['O', 'SOL', 'BRILHA', 'NO', 'CÉU'],
-            ['A', 'FLOR', 'É', 'BELA', 'DEMAIS'],
-            ['MEU', 'CÃO', 'LATE', 'BEM', 'ALTO'],
-            ['EU', 'LEIO', 'LIVROS', 'TODO', 'DIA'],
-            ['A', 'ESCOLA', 'É', 'MUITO', 'LEGAL'],
-            ['GOSTO', 'DE', 'BRINCAR', 'NO', 'PARQUE'],
-            ['O', 'GATO', 'DORME', 'NA', 'CAMA'],
-            ['EU', 'TENHO', 'UM', 'BOM', 'AMIGO'],
-            ['A', 'ÁGUA', 'É', 'BOA', 'DEMAIS'],
-            ['O', 'CÉU', 'FICA', 'AZUL', 'CLARO'],
-            ['EU', 'CORRO', 'NO', 'PÁTIO', 'GRANDE'],
-            ['A', 'BOLA', 'É', 'MINHA', 'AMIGA'],
-            ['MAMÃE', 'FAZ', 'BOLO', 'DE', 'CHOCOLATE'],
-            ['O', 'PASSARINHO', 'CANTA', 'NA', 'ÁRVORE'],
-            ['EU', 'AJUDO', 'MEU', 'IRMÃO', 'PEQUENO'],
-            ['A', 'TERRA', 'É', 'NOSSO', 'LAR'],
-            ['GOSTO', 'DE', 'DESENHAR', 'COM', 'LÁPIS'],
-            ['O', 'SORVETE', 'É', 'BEM', 'GOSTOSO'],
-            ['EU', 'TENHO', 'SONHOS', 'MUITO', 'LINDOS']
+
+            ['O', 'MACACO', 'SUBIU', 'NA', 'ARVORE'],
+            ['A', 'BOLA', 'CAIU', 'NO', 'MATO'],
+            ['O', 'SUCO', 'É', 'DE', 'CAJU'],
+            ['A', 'GALINHA', 'BOTOU', 'UM', 'OVO'],
+
+            ['A', 'JANELA', 'ESTÁ', 'FECHADA', '.'],
+            ['A', 'FADA', 'FEZ', 'UMA', 'MÁGICA'],
+            ['O', 'LEÃO', 'É', 'FEROZ', '.'],
+            ['A', 'CASA', 'É', 'AMARELA', '.'],
+            ['MAMÃE', 'COMEU', 'UMA', 'SALADA', '.'],
+            ['O', 'PAPAI', 'FOI', 'TRABALHAR', '.'],
+
+            ['O', 'PICOLÉ', 'É', 'DE', 'UVA'],
+            ['O', 'BEBÊ', 'FOI', 'AO', 'MÉDICO'],
+            ['O', 'PATO', 'NADA', 'NA', 'LAGOA'],
+            ['O', 'MENINO', 'FOI', 'PARA', 'ESCOLA'],
+            ['A', 'ZEBRA', 'ESTÁ', 'ESPANTADA', '.'],
+
+            ['A', 'VOVÓ', 'FEZ', 'UM', 'BOLO'],
+            ['O', 'DENTE', 'DO', 'MENINO', 'CAIU'],
+            ['O', 'CAFÉ', 'ESTÁ', 'NO', 'BULÉ'],
+            ['O', 'GATO', 'ESTÁ', 'DORMINDO', '.'],
+            ['O', 'CACHORRO', 'ESTÁ', 'NO', 'QUINTAL'],
+
+            ['A', 'VACA', 'FUGIU', 'DO', 'CURRAL'],
+            ['O', 'BOLO', 'É', 'DE', 'CHOCOLATE'],
+            ['O', 'SAPO', 'ESTÁ', 'NO', 'POÇO'],
+            ['A', 'MENINA', 'CAIU', 'NA', 'RUA'],
+            ['O', 'MENINO', 'SUBIU', 'NO', 'TELHADO']
+
         ];
         let shuffled = [];
 
@@ -427,12 +438,7 @@
 
             // Seleciona 6 frases fixas
             const selectedPhrases = [
-                ['EU', 'GOSTO', 'DE', 'COMER', 'FRUTAS'],
-                ['O', 'SOL', 'BRILHA', 'NO', 'CÉU'],
-                ['A', 'FLOR', 'É', 'BELA', 'DEMAIS'],
-                ['MEU', 'CÃO', 'LATE', 'BEM', 'ALTO'],
-                ['EU', 'LEIO', 'LIVROS', 'TODO', 'DIA'],
-                ['A', 'ESCOLA', 'É', 'MUITO', 'LEGAL']
+
             ];
 
             // Cria colunas com palavras por posição
