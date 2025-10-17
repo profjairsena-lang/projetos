@@ -436,15 +436,16 @@
         function buildShuffled() {
             shuffled = [];
 
-            // Seleciona 6 frases fixas
-            const selectedPhrases = [
-                ['EU', 'GOSTO', 'DE', 'COMER', 'FRUTAS'],
-                ['O', 'SOL', 'BRILHA', 'NO', 'CÉU'],
-                ['A', 'FLOR', 'É', 'BELA', 'DEMAIS'],
-                ['MEU', 'CÃO', 'LATE', 'BEM', 'ALTO'],
-                ['EU', 'LEIO', 'LIVROS', 'TODO', 'DIA'],
-                ['A', 'ESCOLA', 'É', 'MUITO', 'LEGAL']
-            ];
+            // Sorteia 6 frases únicas a partir de gamePhrases
+            const selectedPhrases = [];
+            const usedIndexes = new Set();
+            while (selectedPhrases.length < 6 && usedIndexes.size < gamePhrases.length) {
+                const i = Math.floor(Math.random() * gamePhrases.length);
+                if (!usedIndexes.has(i)) {
+                    usedIndexes.add(i);
+                    selectedPhrases.push(gamePhrases[i]);
+                }
+            }
 
             // Cria colunas com palavras por posição
             const columns = {
@@ -483,13 +484,12 @@
             // Monta o grid: 6 linhas × 5 colunas
             for (let row = 0; row < 6; row++) {
                 for (let col = 1; col <= 5; col++) {
-                    const cell = col === 1
-                        ? columns[col][row] // palavra 1 mantém a linha original
-                        : columns[col][row]; // palavras embaralhadas nas demais colunas
+                    const cell = columns[col][row];
                     shuffled.push(cell);
                 }
             }
         }
+
 
 
 
