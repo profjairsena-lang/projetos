@@ -588,11 +588,30 @@
 
             // Troca de jogador somente após 5 palavras
             if (paintedThisTurn === 5) {
+                const acertou = checkSeq(selectedColorId);
+
+                if (!acertou) {
+                    // Remove pinturas erradas (não pertencem a frases corretas)
+                    const painted = Array.from(document.querySelectorAll(`.cell.painted[data-cid="${selectedColorId}"]`));
+                    painted.forEach(cell => {
+                        if (!cell.classList.contains('correct-phrase')) {
+                            cell.classList.remove('painted');
+                            cell.style.background = '';
+                            cell.style.color = '';
+                            cell.removeAttribute('data-cid');
+                            paintedCount--;
+                        }
+                    });
+                    $('paintedCount').textContent = paintedCount;
+                }
+
                 selectedColorId = null;
                 refreshPalette();
                 switchPlayer();
                 paintedThisTurn = 0;
             }
+
+
 
             checkGameEnd();
         }
