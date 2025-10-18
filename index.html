@@ -629,7 +629,7 @@
                 const sorted = groups[p].sort((a, b) => a.pos - b.pos);
                 const positions = sorted.map(x => x.pos);
                 if (positions.join(',') === '1,2,3,4,5') {
-                    playerScores[currentPlayer] += 20;
+                    playerScores[currentPlayer] += 10;
                     $('score1').textContent = playerScores[1];
                     $('score2').textContent = playerScores[2];
 
