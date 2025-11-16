@@ -191,6 +191,112 @@
         </div>
     </div>
     <script>
+        // Detecção de dispositivo e orientação
+        function detectDevice() {
+            const userAgent = navigator.userAgent.toLowerCase();
+            const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+            const isAndroid = /android/i.test(userAgent);
+            const isIOS = /iphone|ipad|ipod/i.test(userAgent);
+
+            return {
+                isMobile,
+                isAndroid,
+                isIOS,
+                isDesktop: !isMobile
+            };
+        }
+
+        function checkOrientation() {
+            const device = detectDevice();
+
+            if (device.isAndroid && window.innerWidth < window.innerHeight) {
+                showOrientationMessage();
+            } else {
+                hideOrientationMessage();
+            }
+        }
+
+        function showOrientationMessage() {
+            let orientationOverlay = document.getElementById('orientationOverlay');
+
+            if (!orientationOverlay) {
+                orientationOverlay = document.createElement('div');
+                orientationOverlay.id = 'orientationOverlay';
+                orientationOverlay.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.95);
+          z-index: 9999;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          text-align: center;
+          padding: 20px;
+          box-sizing: border-box;
+        `;
+
+                orientationOverlay.innerHTML = `
+          <div style="font-size: 80px; margin-bottom: 20px; animation: rotatePhone 2s infinite;">📱</div>
+          <h2 style="font-size: 24px; margin-bottom: 16px; font-weight: bold;">Melhor Experiência</h2>
+          <p style="font-size: 18px; margin-bottom: 20px; line-height: 1.4;">
+            Para jogar com mais conforto,<br>
+            <strong>gire seu celular para o modo paisagem</strong>
+          </p>
+          <div style="font-size: 16px; color: #ccc; margin-top: 20px;">
+            🔄 Rotacione o dispositivo horizontalmente
+          </div>
+          <button onclick="hideOrientationMessage()" style="
+            margin-top: 30px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+          " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+            Continuar Mesmo Assim
+          </button>
+        `;
+
+                // Adiciona animação CSS
+                const style = document.createElement('style');
+                style.textContent = `
+          @keyframes rotatePhone {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-15deg); }
+            75% { transform: rotate(15deg); }
+          }
+        `;
+                document.head.appendChild(style);
+
+                document.body.appendChild(orientationOverlay);
+            }
+
+            orientationOverlay.style.display = 'flex';
+        }
+
+        function hideOrientationMessage() {
+            const orientationOverlay = document.getElementById('orientationOverlay');
+            if (orientationOverlay) {
+                orientationOverlay.style.display = 'none';
+            }
+        }
+
+        // Verifica orientação ao carregar e ao redimensionar
+        window.addEventListener('load', checkOrientation);
+        window.addEventListener('resize', checkOrientation);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(checkOrientation, 500); // Delay para aguardar a mudança completa
+        });
+
         const emojis = [
             '😀', '😎', '🤩', '🥳', '🤯', '🤖', '👻', '👑', '🐶', '🐱',
             '🐭', '🦊', '🐻', '🐼', '🦁', '🦄', '🐸', '🦖', '🦋', '🐝',
@@ -742,7 +848,7 @@
                     currentPlayer = 1 - currentPlayer;
                     updateActivePlayer();
                     setTimeout(() => {
-                        toast(`🎯 Vez do (a) ${currentPlayer === 0 ? $('name1').textContent : $('name2').textContent}!`, true);
+                        toast(`Vez do(a) ${currentPlayer === 0 ? $('name1').textContent : $('name2').textContent}!`, true);
                     }, 2100);
                 }
 
@@ -756,7 +862,7 @@
                     currentPlayer = 1 - currentPlayer;
                     updateActivePlayer();
                     setTimeout(() => {
-                        toast(`🎯 Vez do ${currentPlayer === 0 ? $('name1').textContent : $('name2').textContent}!`, true);
+                        toast(`Vez do(a) ${currentPlayer === 0 ? $('name1').textContent : $('name2').textContent}!`, true);
                     }, 2100);
                 }
 
@@ -1096,7 +1202,7 @@
             // Passa a vez para o próximo jogador
             currentPlayer = 1 - currentPlayer;
             updateActivePlayer();
-            toast(`🎯 Vez do ${currentPlayer === 0 ? $('name1').textContent : $('name2').textContent}!`, true);
+            toast(`Vez do(a) ${currentPlayer === 0 ? $('name1').textContent : $('name2').textContent}!`, true);
         }
 
         $('closeMeaning').addEventListener('click', closeMeaningModal);
@@ -1349,7 +1455,7 @@
         // Carrega as frases do JSON ao iniciar
         loadPhrasesFromJSON();
     </script>
-    <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'99ef02cd30926c1e',t:'MTc2MzIxMjQ1OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
+    <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'99f86a5314271af2',t:'MTc2MzMxMTA3MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
 </body>
 
 </html>
