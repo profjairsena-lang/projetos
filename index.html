@@ -2,227 +2,1214 @@
 <html lang="pt-BR">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desafio das Palavras</title>
-    <script src="/_sdk/element_sdk.js"></script>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Desafio das Palavras</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c, #4ecdc4, #45b7d1);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100%;
+      height: 100%;
+    }
 
-    <style>
-        @view-transition {
-            navigation: auto;
-        }
-    </style>
-    <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
-    <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+    @keyframes gradientShift {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    html {
+      height: 100%;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 700px;
+      background: white;
+      border-radius: 16px;
+      padding: 20px 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .title {
+      text-align: center;
+      font-size: 28px;
+      font-weight: bold;
+      color: #667eea;
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 13px;
+      color: #6c757d;
+      margin-bottom: 16px;
+    }
+
+    .player-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .avatar {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, #66b4f9 0%, #1b0b6c 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 55px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      flex-shrink: 0;
+    }
+
+    .avatar:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
+    }
+
+    .avatar:active {
+      transform: scale(0.95);
+    }
+
+    .avatar[data-player="2"] {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .player-inputs {
+      flex: 0.45;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .input {
+      width: 100%;
+      padding: 5px 8px;
+      font-size: 19px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .input:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .select {
+      width: 100%;
+      padding: 5px 8px;
+      font-size: 19px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      outline: none;
+      background: white;
+      cursor: pointer;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      color: #6c757d;
+    }
+
+    .select:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .select option {
+      font-size: 12px;
+    }
+
+    .year-class-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .year-class-row .select {
+      flex: 1;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 10px 24px;
+      font-size: 15px;
+      font-weight: bold;
+      color: white;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      margin-top: 8px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .emoji-picker {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      max-width: 320px;
+      width: 90%;
+    }
+
+    .emoji-picker-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #2d3748;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .emoji-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .emoji-option {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+
+    .emoji-option:hover {
+      background-color: #f0f4ff;
+      transform: scale(1.1);
+    }
+
+    .emoji-option:active {
+      transform: scale(0.95);
+    }
+
+    .emoji-picker-close {
+      width: 100%;
+      padding: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #667eea;
+      background: #f0f4ff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .emoji-picker-close:hover {
+      background-color: #e0e7ff;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      display: none;
+    }
+
+    .overlay.active {
+      display: block;
+    }
+
+    .score-board {
+      display: flex;
+      justify-content: space-around;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .player-score {
+      flex: 1;
+      min-width: 180px;
+      background: linear-gradient(135deg, #f7f9f4 0%, #ffffff 100%);
+      border-radius: 8px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .score-emoji {
+      font-size: 22px;
+      transition: font-size 0.3s ease, transform 0.3s ease;
+
+    }
+
+    .score-emoji.active {
+      font-size: 44px;
+      transform: scale(1);
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #7de0c6 0%, #29d3a6 100%);
+
+    }
+
+    .score-name {
+      flex: 1;
+      font-size: 18px;
+      font-weight: 600;
+      color: #2d3748;
+      transition: font-size 0.3s ease, text-transform 0.3s ease;
+    }
+
+    .score-name.active {
+      font-size: 22.5px;
+      text-transform: uppercase;
+    }
+
+    .score-points {
+      font-size: 38px;
+      font-weight: bold;
+      color: #4e5fad;
+      min-width: 30px;
+      text-align: right;
+    }
+
+    .palette-container {
+      position: relative;
+      margin-bottom: 12px;
+    }
+
+    .palette {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .meaning-btn {
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: white;
+      background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+    }
+
+    .meaning-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+    }
+
+    .meaning-btn:active {
+      transform: translateY(0);
+    }
+
+    .meaning-btn.active {
+      background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.7;
+      }
+    }
+
+    .color-btn {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .color-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .color-btn.selected {
+      border-color: #2d3748;
+      transform: scale(1.15);
+    }
+
+    .color-btn.blocked {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 3px;
+      margin-bottom: 8px;
+    }
+
+    .cell {
+      aspect-ratio: 4;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.2s ease;
+      padding: 2px;
+      text-align: center;
+      word-break: break-word;
+      line-height: 1.1;
+      overflow: hidden;
+    }
+
+    .cell:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .cell.painted {
+      color: white;
+      border-color: transparent;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #2d3748;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+      z-index: 1001;
+    }
+
+    .toast.turn-toast {
+      top: 50%;
+      bottom: auto;
+      transform: translate(-50%, -50%);
+      font-size: 28px;
+      padding: 24px 32px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
+      text-align: center;
+      min-width: 300px;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
+    .penalty-toast {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(135deg, #e53e3e 0%, #f56565 100%);
+      color: white;
+      padding: 24px 32px;
+      border-radius: 16px;
+      font-size: 42px;
+      font-weight: bold;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+      z-index: 1002;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(229, 62, 62, 0.4);
+      border: 3px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .penalty-toast.show {
+      opacity: 1;
+    }
+
+    .success-emoji {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 120px;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1003;
+      text-align: center;
+      animation: successAnimation 3s ease-out forwards;
+    }
+
+    @keyframes successAnimation {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+      }
+
+      20% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(2);
+      }
+
+      30% {
+        transform: translate(-50%, -70%) scale(2);
+      }
+
+      40% {
+        transform: translate(-50%, -30%) scale(2);
+      }
+
+      50% {
+        transform: translate(-50%, -65%) scale(2);
+      }
+
+      60% {
+        transform: translate(-50%, -35%) scale(2);
+      }
+
+      70% {
+        transform: translate(-50%, -60%) scale(2);
+      }
+
+      80% {
+        transform: translate(-50%, -40%) scale(2);
+      }
+
+      90% {
+        transform: translate(-50%, -50%) scale(2);
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(2);
+      }
+    }
+
+    .btn.small {
+      padding: 6px 16px;
+      font-size: 14 px;
+      margin-top: 6px;
+    }
+
+    .history-modal {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 8px;
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      width: 400px;
+      max-width: 90vw;
+      max-height: 70vh;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .history-modal.active {
+      display: block;
+    }
+
+    .history-title {
+      font-size: 22px;
+      font-weight: bold;
+      color: #2d3748;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .history-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #667eea;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: #6c757d;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .history-list {
+      margin-bottom: 16px;
+    }
+
+    .history-item {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .history-players {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 600;
+      color: #2d3748;
+    }
+
+    .history-score {
+      font-size: 16px;
+      font-weight: bold;
+      color: #667eea;
+      margin: 0 12px;
+    }
+
+    .history-date {
+      font-size: 10px;
+      color: #6c757d;
+    }
+
+    .history-winner {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .history-winner .history-players,
+    .history-winner .history-score,
+    .history-winner .history-date {
+      color: white;
+    }
+
+    .history-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .history-btn {
+      flex: 1;
+      padding: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .history-btn-close {
+      background: #f0f4ff;
+      color: #667eea;
+    }
+
+    .history-btn-close:hover {
+      background: #e0e7ff;
+    }
+
+    .history-btn-clear {
+      background: #fee;
+      color: #e53e3e;
+    }
+
+    .history-btn-clear:hover {
+      background: #fdd;
+    }
+
+    .history-icon {
+      position: relative;
+      width: 35px;
+      height: 35px;
+      background: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      z-index: 100;
+    }
+
+    .history-icon:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .no-history {
+      text-align: center;
+      padding: 40px 20px;
+      color: #6c757d;
+      font-size: 14px;
+    }
+
+    .meaning-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      max-width: 500px;
+      width: 90%;
+      max-height: 70%;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .meaning-modal.active {
+      display: block;
+    }
+
+    .meaning-modal-title {
+      font-size: 22px;
+      font-weight: bold;
+      color: #2d3748;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .meaning-content {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #2d3748;
+      margin-bottom: 16px;
+    }
+
+    .meaning-loading {
+      text-align: center;
+      padding: 40px;
+      color: #6c757d;
+    }
+
+    .meaning-close-btn {
+      width: 100%;
+      padding: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #667eea;
+      background: #f0f4ff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .meaning-close-btn:hover {
+      background-color: #e0e7ff;
+    }
+
+    .meaning-source {
+      font-size: 11px;
+      color: #6c757d;
+      text-align: center;
+      margin-top: 12px;
+    }
+
+    .game-over-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      border-radius: 16px;
+      padding: 24px 20px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      max-width: 450px;
+      width: 90%;
+      text-align: center;
+      display: none;
+    }
+
+    .game-over-modal.active {
+      display: block;
+    }
+
+    .game-over-title {
+      font-size: 28px;
+      font-weight: bold;
+      color: #2d3748;
+      margin-bottom: 6px;
+    }
+
+    .game-over-winner {
+      font-size: 20px;
+      font-weight: bold;
+      color: #667eea;
+      margin-bottom: 18px;
+    }
+
+    .game-over-scores {
+      display: flex;
+      justify-content: space-around;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .game-over-player {
+      flex: 1;
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .game-over-player.winner {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      transform: scale(1.05);
+    }
+
+    .game-over-emoji {
+      font-size: 32px;
+      margin-bottom: 6px;
+    }
+
+    .game-over-name {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #2d3748;
+    }
+
+    .game-over-player.winner .game-over-name {
+      color: white;
+    }
+
+    .game-over-score {
+      font-size: 24px;
+      font-weight: bold;
+      color: #667eea;
+    }
+
+    .game-over-player.winner .game-over-score {
+      color: white;
+    }
+
+    .game-over-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .game-over-btn {
+      width: 100%;
+      padding: 12px 20px;
+      font-size: 15px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .game-over-btn-primary {
+      color: white;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .game-over-btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+
+    .game-over-btn-secondary {
+      color: #667eea;
+      background: #f0f4ff;
+    }
+
+    .game-over-btn-secondary:hover {
+      background: #e0e7ff;
+    }
+
+
+
+    @media (max-width: 640px) {
+      .container {
+        padding: 32px 24px;
+      }
+
+      .title {
+        font-size: 32px;
+      }
+
+      .subtitle {
+        font-size: 14px;
+      }
+
+      .player-row {
+        gap: 10px;
+      }
+
+      .avatar {
+        width: 50px;
+        height: 50px;
+        font-size: 26px;
+      }
+
+      .input {
+        font-size: 14px;
+        padding: 12px 14px;
+      }
+
+      .select {
+        font-size: 13px;
+        padding: 10px 12px;
+      }
+
+      .btn {
+        font-size: 16px;
+        padding: 14px 24px;
+      }
+
+      .emoji-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+
+      .score-board {
+        gap: 12px;
+      }
+
+      .player-score {
+        min-width: 100%;
+      }
+
+      .score-emoji {
+        font-size: 28px;
+      }
+
+      .score-name {
+        font-size: 14px;
+      }
+
+      .score-points {
+        font-size: 20px;
+      }
+
+      .color-btn {
+        width: 40px;
+        height: 40px;
+      }
+
+      .grid {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 6px;
+      }
+
+      .cell {
+        font-size: 14px;
+        padding: 2px;
+        line-height: 1.1;
+      }
+    }
+  </style>
+  <style>
+    @view-transition {
+      navigation: auto;
+    }
+  </style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
 </head>
 
 <body>
-    <div class="overlay" id="overlay"></div>
-    <div class="container" id="setupPanel">
-        <h2 class="title" id="gameTitle">🎨 Desafio das Palavras</h2>
-        <p class="subtitle" id="subtitle">Insira os nomes e, se quiser, personalize os avatares.</p>
-        <div class="player-row">
-            <div id="avatarP1" class="avatar" data-player="1">
-                🧑‍💻
-            </div>
-            <div class="player-inputs"><input id="p1" class="input" placeholder="Jogador 1" maxlength="15">
-                <div class="year-class-row"><select id="year1" class="select">
-                        <option value="">Ano</option>
-                        <option value="1º">1º ano</option>
-                        <option value="2º">2º ano</option>
-                        <option value="3º">3º ano</option>
-                        <option value="4º">4º ano</option>
-                        <option value="5º">5º ano</option>
-                    </select> <select id="class1" class="select">
-                        <option value="">Turma</option>
-                        <option value="A">A</option>
-                        <option value="B">B</option>
-                        <option value="C">C</option>
-                        <option value="D">D</option>
-                        <option value="E">E</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-        <div class="player-row">
-            <div id="avatarP2" class="avatar" data-player="2">
-                👽
-            </div>
-            <div class="player-inputs"><input id="p2" class="input" placeholder="Jogador 2" maxlength="15">
-                <div class="year-class-row"><select id="year2" class="select">
-                        <option value="">Ano</option>
-                        <option value="1º">1º ano</option>
-                        <option value="2º">2º ano</option>
-                        <option value="3º">3º ano</option>
-                        <option value="4º">4º ano</option>
-                        <option value="5º">5º ano</option>
-                    </select> <select id="class2" class="select">
-                        <option value="">Turma</option>
-                        <option value="A">A</option>
-                        <option value="B">B</option>
-                        <option value="C">C</option>
-                        <option value="D">D</option>
-                        <option value="E">E</option>
-                    </select>
-                </div>
-            </div>
-        </div><button id="btnStart" class="btn">▶ Iniciar Jogo</button>
+  <div class="overlay" id="overlay"></div>
+  <div class="container" id="welcomePanel">
+    <h2 class="title" style="font-size: 36px; margin-bottom: 8px;">👋 Bem-vindo, Professor!</h2>
+    <p class="subtitle" style="font-size: 16px; margin-bottom: 32px; color: #667eea; font-weight: 600;">Escolha a
+      categoria que vamos trabalhar hoje:</p>
+    <div class="category-selector" style="margin-bottom: 32px;"><select id="categorySelect" class="category-select"
+        style="width: 100%; padding: 18px 24px; font-size: 18px; border: 3px solid #667eea; border-radius: 12px; outline: none; background: white; cursor: pointer; transition: all 0.3s ease; color: #2d3748; font-weight: 700; box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25); appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23667eea%27 stroke-width=%273%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 16px center; background-size: 24px; padding-right: 52px;">
+        <option value="">📚 Selecione uma categoria...</option>
+        <option value="all">🎲 Todas (Aleatório)</option>
+        <option value="association">🔗 Associação</option>
+        <option value="rhymes">🎵 Rimas</option>
+        <option value="frases_simples">📝 Frases Simples</option>
+        <option value="digrafo_s">🔤 Dígrafo e "S"</option>
+      </select>
+    </div><button id="btnStartFromWelcome" class="btn"
+      style="opacity: 0.5; cursor: not-allowed; font-size: 18px; padding: 16px 32px;" disabled> ▶ Continuar para
+      Configuração </button>
+    <div
+      style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #6c757d;">
+      Desenvolvido por Prof Jair Sena @2025
     </div>
-    <div class="container" id="gamePanel" style="display:none;">
-        <div class="score-board">
-            <div class="player-score"><span class="score-emoji" id="label1">🧑‍💻</span> <span class="score-name"
-                    id="name1">Jogador 1</span> <span class="score-points" id="score1">0</span>
-            </div>
-            <div class="player-score"><span class="score-emoji" id="label2">👽</span> <span class="score-name"
-                    id="name2">Jogador 2</span> <span class="score-points" id="score2">0</span>
-            </div>
+  </div>
+  <div class="container" id="setupPanel" style="display:none;">
+    <h2 class="title" id="gameTitle">🎨 Desafio das Palavras</h2>
+    <p class="subtitle" id="subtitle">Insira os nomes e, se quiser, personalize os avatares.</p>
+    <div class="player-row">
+      <div id="avatarP1" class="avatar" data-player="1">
+        🧑‍💻
+      </div>
+      <div class="player-inputs"><input id="p1" class="input" placeholder="Jogador 1" maxlength="15">
+        <div class="year-class-row"><select id="year1" class="select">
+            <option value="">Ano</option>
+            <option value="1º">1º ano</option>
+            <option value="2º">2º ano</option>
+            <option value="3º">3º ano</option>
+            <option value="4º">4º ano</option>
+            <option value="5º">5º ano</option>
+          </select> <select id="class1" class="select">
+            <option value="">Turma</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+            <option value="E">E</option>
+          </select>
         </div>
-        <div class="palette-container">
-            <div id="palette" class="palette">
-            </div>
-            <div class="history-icon" id="historyIcon" style="display:none; position: absolute; top: 0; right: 0;">
-                📊
-            </div>
-            <div id="historyModal" class="history-modal">
-                <div class="history-title">
-                    📊 Histórico de Partidas
-                </div>
-                <div class="history-stats">
-                    <div class="stat-card">
-                        <div class="stat-value" id="totalGames">
-                            0
-                        </div>
-                        <div class="stat-label">
-                            Partidas
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="player1Wins">
-                            0
-                        </div>
-                        <div class="stat-label" id="player1WinsLabel">
-                            Vitórias P1
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="player2Wins">
-                            0
-                        </div>
-                        <div class="stat-label" id="player2WinsLabel">
-                            Vitórias P2
-                        </div>
-                    </div>
-                </div>
-                <div class="history-list" id="historyList"></div>
-                <div class="history-actions"><button class="history-btn history-btn-close"
-                        id="closeHistory">Fechar</button> <button class="history-btn history-btn-clear"
-                        id="clearHistory">Limpar Histórico</button>
-                </div>
-            </div>
-        </div>
-        <div class="category-selector"><span class="category-label">Categoria:</span> <select id="categorySelect"
-                class="category-select">
-                <option value="all">Todas (Aleatório)</option>
-                <option value="association">Associação</option>
-                <option value="rhymes">Rimas</option>
-                <option value="frases_simples">Frases Simples</option>
-                <option value="digrafo_s">Dígrafo e "S"</option>
-            </select>
-        </div>
-        <div id="grid" class="grid"></div>
-        <div id="toast" class="toast"></div>
-        <div id="penaltyToast" class="penalty-toast"></div>
+      </div>
     </div>
-    <div id="emojiPicker" class="emoji-picker" style="display:none;">
-        <div class="emoji-picker-title">
-            Escolha um avatar
+    <div class="player-row">
+      <div id="avatarP2" class="avatar" data-player="2">
+        👽
+      </div>
+      <div class="player-inputs"><input id="p2" class="input" placeholder="Jogador 2" maxlength="15">
+        <div class="year-class-row"><select id="year2" class="select">
+            <option value="">Ano</option>
+            <option value="1º">1º ano</option>
+            <option value="2º">2º ano</option>
+            <option value="3º">3º ano</option>
+            <option value="4º">4º ano</option>
+            <option value="5º">5º ano</option>
+          </select> <select id="class2" class="select">
+            <option value="">Turma</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+            <option value="E">E</option>
+          </select>
         </div>
-        <div class="emoji-grid" id="emojiGrid"></div><button class="emoji-picker-close"
-            id="closeEmojiPicker">Fechar</button>
+      </div>
+    </div><button id="btnStart" class="btn">▶ Iniciar Jogo</button>
+    <div
+      style="text-align: center; margin-top: 16px; padding-top: 12px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #6c757d;">
+      Desenvolvido por Prof Jair Sena @2025
     </div>
-    <div id="meaningModal" class="meaning-modal">
-        <div class="meaning-modal-title" id="meaningTitle">
-            Significado
-        </div>
-        <div class="meaning-content" id="meaningContent">
-            <div class="meaning-loading">
-                Carregando...
-            </div>
-        </div>
-        <div class="meaning-source">
-            Fonte: Dicionário Informal
-        </div><button class="meaning-close-btn" id="closeMeaning">Fechar</button>
+  </div>
+  <div class="container" id="gamePanel" style="display:none;">
+    <div class="score-board">
+      <div class="player-score"><span class="score-emoji" id="label1">🧑‍💻</span> <span class="score-name"
+          id="name1">Jogador 1</span> <span class="score-points" id="score1">0</span>
+      </div>
+      <div class="player-score"><span class="score-emoji" id="label2">👽</span> <span class="score-name"
+          id="name2">Jogador 2</span> <span class="score-points" id="score2">0</span>
+      </div>
     </div>
-    <div id="gameOverModal" class="game-over-modal">
-        <div class="game-over-title">
-            🎮 Fim de Jogo!
+    <div class="palette-container">
+      <div id="palette" class="palette">
+      </div>
+      <div class="history-icon" id="historyIcon" style="display:none; position: absolute; top: 0; right: 0;">
+        📊
+      </div>
+      <div id="historyModal" class="history-modal">
+        <div class="history-title">
+          📊 Histórico de Partidas
         </div>
-        <div class="game-over-winner" id="gameOverWinner">
-            Vencedor: Jogador 1
-        </div>
-        <div class="game-over-scores">
-            <div class="game-over-player" id="gameOverPlayer1">
-                <div class="game-over-emoji" id="gameOverEmoji1">
-                    🧑‍💻
-                </div>
-                <div class="game-over-name" id="gameOverName1">
-                    Jogador 1
-                </div>
-                <div class="game-over-score" id="gameOverScore1">
-                    0
-                </div>
+        <div class="history-stats">
+          <div class="stat-card">
+            <div class="stat-value" id="totalGames">
+              0
             </div>
-            <div class="game-over-player" id="gameOverPlayer2">
-                <div class="game-over-emoji" id="gameOverEmoji2">
-                    👽
-                </div>
-                <div class="game-over-name" id="gameOverName2">
-                    Jogador 2
-                </div>
-                <div class="game-over-score" id="gameOverScore2">
-                    0
-                </div>
+            <div class="stat-label">
+              Partidas
             </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="player1Wins">
+              0
+            </div>
+            <div class="stat-label" id="player1WinsLabel">
+              Vitórias P1
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="player2Wins">
+              0
+            </div>
+            <div class="stat-label" id="player2WinsLabel">
+              Vitórias P2
+            </div>
+          </div>
         </div>
-        <div class="game-over-actions"><button class="game-over-btn game-over-btn-primary" id="playAgainBtn">🔄 Jogar
-                Novamente</button> <button class="game-over-btn game-over-btn-secondary" id="newPlayersBtn">👥 Novos
-                Jogadores</button>
+        <div class="history-list" id="historyList"></div>
+        <div class="history-actions"><button class="history-btn history-btn-close" id="closeHistory">Fechar</button>
+          <button class="history-btn history-btn-clear" id="clearHistory">Limpar Histórico</button>
         </div>
+      </div>
     </div>
-    <script>
-        // Detecção de dispositivo e orientação
-        function detectDevice() {
-            const userAgent = navigator.userAgent.toLowerCase();
-            const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
-            const isAndroid = /android/i.test(userAgent);
-            const isIOS = /iphone|ipad|ipod/i.test(userAgent);
+    <div id="grid" class="grid"></div>
+    <div id="toast" class="toast"></div>
+    <div id="penaltyToast" class="penalty-toast"></div>
+    <div
+      style="text-align: center; margin-top: 16px; padding-top: 12px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #6c757d;">
+      Desenvolvido por Prof Jair Sena @2025
+    </div>
+  </div>
+  <div id="emojiPicker" class="emoji-picker" style="display:none;">
+    <div class="emoji-picker-title">
+      Escolha um avatar
+    </div>
+    <div class="emoji-grid" id="emojiGrid"></div><button class="emoji-picker-close"
+      id="closeEmojiPicker">Fechar</button>
+  </div>
+  <div id="meaningModal" class="meaning-modal">
+    <div class="meaning-modal-title" id="meaningTitle">
+      Significado
+    </div>
+    <div class="meaning-content" id="meaningContent">
+      <div class="meaning-loading">
+        Carregando...
+      </div>
+    </div>
+    <div class="meaning-source">
+      Fonte: Dicionário Informal
+    </div><button class="meaning-close-btn" id="closeMeaning">Fechar</button>
+  </div>
+  <div id="gameOverModal" class="game-over-modal">
+    <div class="game-over-title">
+      🎮 Fim de Jogo!
+    </div>
+    <div class="game-over-winner" id="gameOverWinner">
+      Vencedor: Jogador 1
+    </div>
+    <div class="game-over-scores">
+      <div class="game-over-player" id="gameOverPlayer1">
+        <div class="game-over-emoji" id="gameOverEmoji1">
+          🧑‍💻
+        </div>
+        <div class="game-over-name" id="gameOverName1">
+          Jogador 1
+        </div>
+        <div class="game-over-score" id="gameOverScore1">
+          0
+        </div>
+      </div>
+      <div class="game-over-player" id="gameOverPlayer2">
+        <div class="game-over-emoji" id="gameOverEmoji2">
+          👽
+        </div>
+        <div class="game-over-name" id="gameOverName2">
+          Jogador 2
+        </div>
+        <div class="game-over-score" id="gameOverScore2">
+          0
+        </div>
+      </div>
+    </div>
+    <div class="game-over-actions"><button class="game-over-btn game-over-btn-primary" id="playAgainBtn">🔄 Jogar
+        Novamente</button> <button class="game-over-btn game-over-btn-secondary" id="newPlayersBtn">👥 Novos
+        Jogadores</button>
+    </div>
+  </div>
+  <script>
+    // Detecção de dispositivo e orientação
+    function detectDevice() {
+      const userAgent = navigator.userAgent.toLowerCase();
+      const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+      const isAndroid = /android/i.test(userAgent);
+      const isIOS = /iphone|ipad|ipod/i.test(userAgent);
 
-            return {
-                isMobile,
-                isAndroid,
-                isIOS,
-                isDesktop: !isMobile
-            };
-        }
+      return {
+        isMobile,
+        isAndroid,
+        isIOS,
+        isDesktop: !isMobile
+      };
+    }
 
-        function checkOrientation() {
-            const device = detectDevice();
+    function checkOrientation() {
+      const device = detectDevice();
 
-            if (device.isAndroid && window.innerWidth < window.innerHeight) {
-                showOrientationMessage();
-            } else {
-                hideOrientationMessage();
-            }
-        }
+      if (device.isAndroid && window.innerWidth < window.innerHeight) {
+        showOrientationMessage();
+      } else {
+        hideOrientationMessage();
+      }
+    }
 
-        function showOrientationMessage() {
-            let orientationOverlay = document.getElementById('orientationOverlay');
+    function showOrientationMessage() {
+      let orientationOverlay = document.getElementById('orientationOverlay');
 
-            if (!orientationOverlay) {
-                orientationOverlay = document.createElement('div');
-                orientationOverlay.id = 'orientationOverlay';
-                orientationOverlay.style.cssText = `
+      if (!orientationOverlay) {
+        orientationOverlay = document.createElement('div');
+        orientationOverlay.id = 'orientationOverlay';
+        orientationOverlay.style.cssText = `
           position: fixed;
           top: 0;
           left: 0;
@@ -240,7 +1227,7 @@
           box-sizing: border-box;
         `;
 
-                orientationOverlay.innerHTML = `
+        orientationOverlay.innerHTML = `
           <div style="font-size: 80px; margin-bottom: 20px; animation: rotatePhone 2s infinite;">📱</div>
           <h2 style="font-size: 24px; margin-bottom: 16px; font-weight: bold;">Melhor Experiência</h2>
           <p style="font-size: 18px; margin-bottom: 20px; line-height: 1.4;">
@@ -266,808 +1253,745 @@
           </button>
         `;
 
-                // Adiciona animação CSS
-                const style = document.createElement('style');
-                style.textContent = `
+        // Adiciona animação CSS
+        const style = document.createElement('style');
+        style.textContent = `
           @keyframes rotatePhone {
             0%, 100% { transform: rotate(0deg); }
             25% { transform: rotate(-15deg); }
             75% { transform: rotate(15deg); }
           }
         `;
-                document.head.appendChild(style);
+        document.head.appendChild(style);
 
-                document.body.appendChild(orientationOverlay);
+        document.body.appendChild(orientationOverlay);
+      }
+
+      orientationOverlay.style.display = 'flex';
+    }
+
+    function hideOrientationMessage() {
+      const orientationOverlay = document.getElementById('orientationOverlay');
+      if (orientationOverlay) {
+        orientationOverlay.style.display = 'none';
+      }
+    }
+
+    // Verifica orientação ao carregar e ao redimensionar
+    window.addEventListener('load', checkOrientation);
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', () => {
+      setTimeout(checkOrientation, 500); // Delay para aguardar a mudança completa
+    });
+
+    const emojis = [
+      '😀', '😎', '🤩', '🥳', '🤯', '🤖', '👻', '👑', '🐶', '🐱',
+      '🐭', '🦊', '🐻', '🐼', '🦁', '🦄', '🐸', '🦖', '🦋', '🐝',
+      '🍎', '🍕', '🍔', '🍰', '🍦', '⚽', '🏀', '🎯', '🎮', '🚀',
+      '⭐', '🔥', '💎', '🎨', '🎭', '🎪', '🎸', '🎹', '🎺', '🎻'
+    ];
+
+    let emojiP1 = '🧑‍💻';
+    let emojiP2 = '👽';
+    let currentAvatarElement = null;
+
+    const avatarP1 = document.getElementById('avatarP1');
+    const avatarP2 = document.getElementById('avatarP2');
+    const emojiPicker = document.getElementById('emojiPicker');
+    const overlay = document.getElementById('overlay');
+    const emojiGrid = document.getElementById('emojiGrid');
+
+    const defaultConfig = {
+      game_title: "🎨 Desafio das Palavras",
+      subtitle_text: "Insira os nomes e, se quiser, personalize os avatares.",
+      player1_placeholder: "Jogador 1",
+      player2_placeholder: "Jogador 2",
+      start_button_text: "▶ Iniciar Jogo",
+      background_color: "#667eea",
+      card_color: "#ffffff",
+      text_color: "#2d3748",
+      button_color: "#667eea",
+      accent_color: "#764ba2",
+      font_family: "Segoe UI",
+      font_size: 16
+    };
+
+    async function onConfigChange(config) {
+      const gameTitle = document.getElementById('gameTitle');
+      const subtitle = document.getElementById('subtitle');
+      const p1Input = document.getElementById('p1');
+      const p2Input = document.getElementById('p2');
+      const startButton = document.getElementById('btnStart');
+
+      gameTitle.textContent = config.game_title || defaultConfig.game_title;
+      subtitle.textContent = config.subtitle_text || defaultConfig.subtitle_text;
+      p1Input.placeholder = config.player1_placeholder || defaultConfig.player1_placeholder;
+      p2Input.placeholder = config.player2_placeholder || defaultConfig.player2_placeholder;
+      startButton.textContent = config.start_button_text || defaultConfig.start_button_text;
+
+      const backgroundColor = config.background_color || defaultConfig.background_color;
+      const cardColor = config.card_color || defaultConfig.card_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+      const buttonColor = config.button_color || defaultConfig.button_color;
+      const accentColor = config.accent_color || defaultConfig.accent_color;
+      const fontFamily = config.font_family || defaultConfig.font_family;
+      const fontSize = config.font_size || defaultConfig.font_size;
+
+      document.body.style.background = `linear-gradient(135deg, ${backgroundColor} 0%, ${accentColor} 100%)`;
+      document.querySelector('.container').style.background = cardColor;
+      document.querySelector('.container').style.fontFamily = `${fontFamily}, Tahoma, Geneva, Verdana, sans-serif`;
+
+      gameTitle.style.color = backgroundColor;
+      gameTitle.style.fontSize = `${fontSize * 2.625}px`;
+
+      subtitle.style.color = textColor;
+      subtitle.style.fontSize = `${fontSize}px`;
+
+      const avatars = document.querySelectorAll('.avatar');
+      avatars[0].style.background = `linear-gradient(135deg, ${backgroundColor} 0%, ${accentColor} 100%)`;
+      avatars[1].style.background = `linear-gradient(135deg, ${accentColor} 0%, ${buttonColor} 100%)`;
+
+      document.querySelectorAll('.input').forEach(input => {
+        input.style.fontSize = `${fontSize}px`;
+        input.style.color = textColor;
+      });
+
+      document.querySelectorAll('.select').forEach(select => {
+        select.style.fontSize = `${fontSize * 0.875}px`;
+        select.style.color = textColor;
+      });
+
+      startButton.style.background = `linear-gradient(135deg, ${buttonColor} 0%, ${accentColor} 100%)`;
+      startButton.style.fontSize = `${fontSize * 1.125}px`;
+
+      document.querySelector('.emoji-picker-title').style.color = textColor;
+      document.querySelector('.emoji-picker-title').style.fontSize = `${fontSize * 1.125}px`;
+
+      document.querySelector('.emoji-picker-close').style.color = buttonColor;
+      document.querySelector('.emoji-picker-close').style.fontSize = `${fontSize * 0.875}px`;
+    }
+
+    function mapToCapabilities(config) {
+      return {
+        recolorables: [
+          {
+            get: () => config.background_color || defaultConfig.background_color,
+            set: (value) => {
+              config.background_color = value;
+              window.elementSdk.setConfig({ background_color: value });
             }
-
-            orientationOverlay.style.display = 'flex';
-        }
-
-        function hideOrientationMessage() {
-            const orientationOverlay = document.getElementById('orientationOverlay');
-            if (orientationOverlay) {
-                orientationOverlay.style.display = 'none';
+          },
+          {
+            get: () => config.card_color || defaultConfig.card_color,
+            set: (value) => {
+              config.card_color = value;
+              window.elementSdk.setConfig({ card_color: value });
             }
-        }
-
-        // Verifica orientação ao carregar e ao redimensionar
-        window.addEventListener('load', checkOrientation);
-        window.addEventListener('resize', checkOrientation);
-        window.addEventListener('orientationchange', () => {
-            setTimeout(checkOrientation, 500); // Delay para aguardar a mudança completa
-        });
-
-        const emojis = [
-            '😀', '😎', '🤩', '🥳', '🤯', '🤖', '👻', '👑', '🐶', '🐱',
-            '🐭', '🦊', '🐻', '🐼', '🦁', '🦄', '🐸', '🦖', '🦋', '🐝',
-            '🍎', '🍕', '🍔', '🍰', '🍦', '⚽', '🏀', '🎯', '🎮', '🚀',
-            '⭐', '🔥', '💎', '🎨', '🎭', '🎪', '🎸', '🎹', '🎺', '🎻'
-        ];
-
-        let emojiP1 = '🧑‍💻';
-        let emojiP2 = '👽';
-        let currentAvatarElement = null;
-
-        const avatarP1 = document.getElementById('avatarP1');
-        const avatarP2 = document.getElementById('avatarP2');
-        const emojiPicker = document.getElementById('emojiPicker');
-        const overlay = document.getElementById('overlay');
-        const emojiGrid = document.getElementById('emojiGrid');
-
-        const defaultConfig = {
-            game_title: "🎨 Desafio das Palavras",
-            subtitle_text: "Insira os nomes e, se quiser, personalize os avatares.",
-            player1_placeholder: "Jogador 1",
-            player2_placeholder: "Jogador 2",
-            start_button_text: "▶ Iniciar Jogo",
-            background_color: "#667eea",
-            card_color: "#ffffff",
-            text_color: "#2d3748",
-            button_color: "#667eea",
-            accent_color: "#764ba2",
-            font_family: "Segoe UI",
-            font_size: 16
-        };
-
-        async function onConfigChange(config) {
-            const gameTitle = document.getElementById('gameTitle');
-            const subtitle = document.getElementById('subtitle');
-            const p1Input = document.getElementById('p1');
-            const p2Input = document.getElementById('p2');
-            const startButton = document.getElementById('btnStart');
-
-            gameTitle.textContent = config.game_title || defaultConfig.game_title;
-            subtitle.textContent = config.subtitle_text || defaultConfig.subtitle_text;
-            p1Input.placeholder = config.player1_placeholder || defaultConfig.player1_placeholder;
-            p2Input.placeholder = config.player2_placeholder || defaultConfig.player2_placeholder;
-            startButton.textContent = config.start_button_text || defaultConfig.start_button_text;
-
-            const backgroundColor = config.background_color || defaultConfig.background_color;
-            const cardColor = config.card_color || defaultConfig.card_color;
-            const textColor = config.text_color || defaultConfig.text_color;
-            const buttonColor = config.button_color || defaultConfig.button_color;
-            const accentColor = config.accent_color || defaultConfig.accent_color;
-            const fontFamily = config.font_family || defaultConfig.font_family;
-            const fontSize = config.font_size || defaultConfig.font_size;
-
-            document.body.style.background = `linear-gradient(135deg, ${backgroundColor} 0%, ${accentColor} 100%)`;
-            document.querySelector('.container').style.background = cardColor;
-            document.querySelector('.container').style.fontFamily = `${fontFamily}, Tahoma, Geneva, Verdana, sans-serif`;
-
-            gameTitle.style.color = backgroundColor;
-            gameTitle.style.fontSize = `${fontSize * 2.625}px`;
-
-            subtitle.style.color = textColor;
-            subtitle.style.fontSize = `${fontSize}px`;
-
-            const avatars = document.querySelectorAll('.avatar');
-            avatars[0].style.background = `linear-gradient(135deg, ${backgroundColor} 0%, ${accentColor} 100%)`;
-            avatars[1].style.background = `linear-gradient(135deg, ${accentColor} 0%, ${buttonColor} 100%)`;
-
-            document.querySelectorAll('.input').forEach(input => {
-                input.style.fontSize = `${fontSize}px`;
-                input.style.color = textColor;
-            });
-
-            document.querySelectorAll('.select').forEach(select => {
-                select.style.fontSize = `${fontSize * 0.875}px`;
-                select.style.color = textColor;
-            });
-
-            startButton.style.background = `linear-gradient(135deg, ${buttonColor} 0%, ${accentColor} 100%)`;
-            startButton.style.fontSize = `${fontSize * 1.125}px`;
-
-            document.querySelector('.emoji-picker-title').style.color = textColor;
-            document.querySelector('.emoji-picker-title').style.fontSize = `${fontSize * 1.125}px`;
-
-            document.querySelector('.emoji-picker-close').style.color = buttonColor;
-            document.querySelector('.emoji-picker-close').style.fontSize = `${fontSize * 0.875}px`;
-        }
-
-        function mapToCapabilities(config) {
-            return {
-                recolorables: [
-                    {
-                        get: () => config.background_color || defaultConfig.background_color,
-                        set: (value) => {
-                            config.background_color = value;
-                            window.elementSdk.setConfig({ background_color: value });
-                        }
-                    },
-                    {
-                        get: () => config.card_color || defaultConfig.card_color,
-                        set: (value) => {
-                            config.card_color = value;
-                            window.elementSdk.setConfig({ card_color: value });
-                        }
-                    },
-                    {
-                        get: () => config.text_color || defaultConfig.text_color,
-                        set: (value) => {
-                            config.text_color = value;
-                            window.elementSdk.setConfig({ text_color: value });
-                        }
-                    },
-                    {
-                        get: () => config.button_color || defaultConfig.button_color,
-                        set: (value) => {
-                            config.button_color = value;
-                            window.elementSdk.setConfig({ button_color: value });
-                        }
-                    },
-                    {
-                        get: () => config.accent_color || defaultConfig.accent_color,
-                        set: (value) => {
-                            config.accent_color = value;
-                            window.elementSdk.setConfig({ accent_color: value });
-                        }
-                    }
-                ],
-                borderables: [],
-                fontEditable: {
-                    get: () => config.font_family || defaultConfig.font_family,
-                    set: (value) => {
-                        config.font_family = value;
-                        window.elementSdk.setConfig({ font_family: value });
-                    }
-                },
-                fontSizeable: {
-                    get: () => config.font_size || defaultConfig.font_size,
-                    set: (value) => {
-                        config.font_size = value;
-                        window.elementSdk.setConfig({ font_size: value });
-                    }
-                }
-            };
-        }
-
-        function mapToEditPanelValues(config) {
-            return new Map([
-                ["game_title", config.game_title || defaultConfig.game_title],
-                ["subtitle_text", config.subtitle_text || defaultConfig.subtitle_text],
-                ["player1_placeholder", config.player1_placeholder || defaultConfig.player1_placeholder],
-                ["player2_placeholder", config.player2_placeholder || defaultConfig.player2_placeholder],
-                ["start_button_text", config.start_button_text || defaultConfig.start_button_text]
-            ]);
-        }
-
-        if (window.elementSdk) {
-            window.elementSdk.init({
-                defaultConfig,
-                onConfigChange,
-                mapToCapabilities,
-                mapToEditPanelValues
-            });
-        }
-
-        function populateEmojiPicker() {
-            emojiGrid.innerHTML = '';
-            emojis.forEach(emoji => {
-                const emojiOption = document.createElement('div');
-                emojiOption.className = 'emoji-option';
-                emojiOption.textContent = emoji;
-                emojiOption.addEventListener('click', () => selectEmoji(emoji));
-                emojiGrid.appendChild(emojiOption);
-            });
-        }
-
-        function selectEmoji(emoji) {
-            if (currentAvatarElement) {
-                currentAvatarElement.textContent = emoji;
-
-                const player = currentAvatarElement.dataset.player;
-                if (player === '1') {
-                    emojiP1 = emoji;
-                } else if (player === '2') {
-                    emojiP2 = emoji;
-                }
-
-                closeEmojiPicker();
+          },
+          {
+            get: () => config.text_color || defaultConfig.text_color,
+            set: (value) => {
+              config.text_color = value;
+              window.elementSdk.setConfig({ text_color: value });
             }
-        }
-
-        function openEmojiPicker(avatarElement) {
-            currentAvatarElement = avatarElement;
-            emojiPicker.style.display = 'block';
-            overlay.classList.add('active');
-        }
-
-        function closeEmojiPicker() {
-            emojiPicker.style.display = 'none';
-            overlay.classList.remove('active');
-            currentAvatarElement = null;
-        }
-
-        avatarP1.addEventListener('click', () => openEmojiPicker(avatarP1));
-        avatarP2.addEventListener('click', () => openEmojiPicker(avatarP2));
-
-        document.getElementById('closeEmojiPicker').addEventListener('click', closeEmojiPicker);
-        overlay.addEventListener('click', () => {
-            if (emojiPicker.style.display === 'block') {
-                closeEmojiPicker();
-            } else if ($('gameOverModal').classList.contains('active')) {
-                // Não fecha o modal de fim de jogo clicando no overlay
-                return;
-            } else if ($('historyModal').classList.contains('active')) {
-                closeHistory();
-            } else if ($('meaningModal').classList.contains('active')) {
-                closeMeaningModal();
+          },
+          {
+            get: () => config.button_color || defaultConfig.button_color,
+            set: (value) => {
+              config.button_color = value;
+              window.elementSdk.setConfig({ button_color: value });
             }
-        });
+          },
+          {
+            get: () => config.accent_color || defaultConfig.accent_color,
+            set: (value) => {
+              config.accent_color = value;
+              window.elementSdk.setConfig({ accent_color: value });
+            }
+          }
+        ],
+        borderables: [],
+        fontEditable: {
+          get: () => config.font_family || defaultConfig.font_family,
+          set: (value) => {
+            config.font_family = value;
+            window.elementSdk.setConfig({ font_family: value });
+          }
+        },
+        fontSizeable: {
+          get: () => config.font_size || defaultConfig.font_size,
+          set: (value) => {
+            config.font_size = value;
+            window.elementSdk.setConfig({ font_size: value });
+          }
+        }
+      };
+    }
 
-        // Variáveis do jogo
-        let phrases = [];
-        let blocked = new Set();
-        let selectedColor = null;
-        let movesForCurrentColor = 0;
-        let paintedCount = 0;
-        let scores = [0, 0];
-        let currentPlayer = 0;
+    function mapToEditPanelValues(config) {
+      return new Map([
+        ["game_title", config.game_title || defaultConfig.game_title],
+        ["subtitle_text", config.subtitle_text || defaultConfig.subtitle_text],
+        ["player1_placeholder", config.player1_placeholder || defaultConfig.player1_placeholder],
+        ["player2_placeholder", config.player2_placeholder || defaultConfig.player2_placeholder],
+        ["start_button_text", config.start_button_text || defaultConfig.start_button_text]
+      ]);
+    }
 
-        const colors = [
-            'linear-gradient(135deg, #FF6B6B, #FF8E53)',
-            'linear-gradient(135deg, #4ECDC4, #44A08D)',
-            'linear-gradient(135deg, #B045D1, #E8A2C5)',
-            'linear-gradient(135deg, #d9ff7a, #7acb63)',
-            'linear-gradient(135deg, #98D8C8, #6DD5FA)',
-            'linear-gradient(135deg, #F7DC6F, #F39C12)'
-        ];
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities,
+        mapToEditPanelValues
+      });
+    }
 
-        function $(id) {
-            return document.getElementById(id);
+    function populateEmojiPicker() {
+      emojiGrid.innerHTML = '';
+      emojis.forEach(emoji => {
+        const emojiOption = document.createElement('div');
+        emojiOption.className = 'emoji-option';
+        emojiOption.textContent = emoji;
+        emojiOption.addEventListener('click', () => selectEmoji(emoji));
+        emojiGrid.appendChild(emojiOption);
+      });
+    }
+
+    function selectEmoji(emoji) {
+      if (currentAvatarElement) {
+        currentAvatarElement.textContent = emoji;
+
+        const player = currentAvatarElement.dataset.player;
+        if (player === '1') {
+          emojiP1 = emoji;
+        } else if (player === '2') {
+          emojiP2 = emoji;
         }
 
-        function shuffle(arr) {
-            const copy = [...arr];
-            for (let i = copy.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [copy[i], copy[j]] = [copy[j], copy[i]];
-            }
-            return copy;
-        }
+        closeEmojiPicker();
+      }
+    }
 
-        // Categorias padrão mínimas (apenas 6 frases se não houver frases.json)
-        const defaultCategories = {
-            association: [
-                ['Médico', 'hospital', 'cirurgia', 'enfermeiro', 'paciente'],
-                ['Jardim', 'flor', 'tesoura', 'terra', 'regador']
-            ],
-            rhymes: [
-                ['Coração', 'razão', 'canção', 'balão', 'limão'],
-                ['Escola', 'bola', 'cola', 'gola', 'sola']
-            ],
-            frases_simples: [
-                ['O', 'carteiro', 'entregou', 'a encomenda', 'rapidamente'],
-                ['A', 'criança', 'escondeu', 'o brinquedo', 'debaixo da cama']
-            ],
-            digrafo_s: []
-        };
+    function openEmojiPicker(avatarElement) {
+      currentAvatarElement = avatarElement;
+      emojiPicker.style.display = 'block';
+      overlay.classList.add('active');
+    }
 
-        // Variável global para armazenar as categorias carregadas
-        let categories = { ...defaultCategories };
-        let categoriesLoaded = false;
+    function closeEmojiPicker() {
+      emojiPicker.style.display = 'none';
+      overlay.classList.remove('active');
+      currentAvatarElement = null;
+    }
 
-        // Função para carregar frases do arquivo JSON
-        async function loadPhrasesFromJSON() {
-            try {
-                const response = await fetch('frases.json');
+    avatarP1.addEventListener('click', () => openEmojiPicker(avatarP1));
+    avatarP2.addEventListener('click', () => openEmojiPicker(avatarP2));
 
-                if (response.ok) {
-                    const data = await response.json();
+    document.getElementById('closeEmojiPicker').addEventListener('click', closeEmojiPicker);
+    overlay.addEventListener('click', () => {
+      if (emojiPicker.style.display === 'block') {
+        closeEmojiPicker();
+      } else if ($('gameOverModal').classList.contains('active')) {
+        // Não fecha o modal de fim de jogo clicando no overlay
+        return;
+      } else if ($('historyModal').classList.contains('active')) {
+        closeHistory();
+      } else if ($('meaningModal').classList.contains('active')) {
+        closeMeaningModal();
+      }
+    });
 
-                    // Valida a estrutura do JSON
-                    if (data && typeof data === 'object') {
-                        // Verifica se tem pelo menos uma categoria válida
-                        const hasValidCategory = Object.keys(data).some(key =>
-                            Array.isArray(data[key]) && data[key].length > 0
-                        );
+    // Variáveis do jogo
+    let phrases = [];
+    let blocked = new Set();
+    let selectedColor = null;
+    let movesForCurrentColor = 0;
+    let paintedCount = 0;
+    let scores = [0, 0];
+    let currentPlayer = 0;
 
-                        if (hasValidCategory) {
-                            categories = data;
-                            categoriesLoaded = true;
-                            console.log('✅ Frases carregadas do arquivo frases.json');
-                            updateCategorySelector();
-                            return true;
-                        }
-                    }
-                }
-            } catch (error) {
-                console.log('⚠️ Arquivo frases.json não encontrado, usando apenas 6 frases padrão do sistema');
-            }
+    const colors = [
+      'linear-gradient(135deg, #FF6B6B, #FF8E53)',
+      'linear-gradient(135deg, #4ECDC4, #44A08D)',
+      'linear-gradient(135deg, #B045D1, #E8A2C5)',
+      'linear-gradient(135deg, #d9ff7a, #7acb63)',
+      'linear-gradient(135deg, #98D8C8, #6DD5FA)',
+      'linear-gradient(135deg, #F7DC6F, #F39C12)'
+    ];
 
-            // Se falhar, usa apenas as 6 categorias padrão mínimas
-            categories = { ...defaultCategories };
-            categoriesLoaded = true;
-            console.log('📝 Usando frases padrão do sistema (6 frases disponíveis)');
-            updateCategorySelector();
-            return false;
-        }
+    function $(id) {
+      return document.getElementById(id);
+    }
 
-        // Atualiza o seletor de categorias com as categorias disponíveis
-        function updateCategorySelector() {
-            const selector = $('categorySelect');
-            const currentValue = selector.value;
+    function shuffle(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
 
-            selector.innerHTML = '<option value="all">Todas (Aleatório)</option>';
+    // Categorias padrão mínimas (apenas 6 frases se não houver frases.json)
+    const defaultCategories = {
+      association: [
+        ['Médico', 'hospital', 'cirurgia', 'enfermeiro', 'paciente'],
+        ['Jardim', 'flor', 'tesoura', 'terra', 'regador']
+      ],
+      rhymes: [
+        ['Coração', 'razão', 'canção', 'balão', 'limão'],
+        ['Escola', 'bola', 'cola', 'gola', 'sola']
+      ],
+      frases_simples: [
+        ['O', 'carteiro', 'entregou', 'a encomenda', 'rapidamente'],
+        ['A', 'criança', 'escondeu', 'o brinquedo', 'debaixo da cama']
+      ],
+      digrafo_s: []
+    };
 
-            // Nomes personalizados para as categorias
-            const categoryNames = {
-                'association': 'Associação',
-                'rhymes': 'Rimas',
-                'frases_simples': 'Frases Simples',
-                'digrafo_s': 'Dígrafo e "S"'
-            };
+    // Variável global para armazenar as categorias carregadas
+    let categories = { ...defaultCategories };
+    let categoriesLoaded = false;
 
-            // Adiciona apenas categorias que têm frases disponíveis
-            Object.keys(categories).forEach(categoryKey => {
-                if (categories[categoryKey] && categories[categoryKey].length > 0) {
-                    const option = document.createElement('option');
-                    option.value = categoryKey;
-                    const displayName = categoryNames[categoryKey] || categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1);
-                    const phraseCount = categories[categoryKey].length;
-                    option.textContent = `${displayName} (${phraseCount} frases)`;
-                    selector.appendChild(option);
-                }
-            });
+    // Função para carregar frases do arquivo JSON
+    async function loadPhrasesFromJSON() {
+      try {
+        const response = await fetch('frases.json');
 
-            // Restaura a seleção anterior se ainda existir e for válida
-            if (currentValue && (currentValue === 'all' || (categories[currentValue] && categories[currentValue].length > 0))) {
-                selector.value = currentValue;
-            }
+        if (response.ok) {
+          const data = await response.json();
 
-            // Se não há categorias válidas, desabilita o seletor
-            if (selector.children.length === 1) {
-                selector.disabled = true;
-                selector.style.opacity = '0.5';
-                toast('⚠️ Nenhuma categoria com frases disponível');
-            } else {
-                selector.disabled = false;
-                selector.style.opacity = '1';
-            }
-        }
-
-        function defaults() {
-            const selectedCategory = $('categorySelect').value;
-
-            if (selectedCategory === 'all') {
-                // Combina todas as categorias disponíveis
-                const allPhrases = [];
-                Object.keys(categories).forEach(categoryKey => {
-                    if (categories[categoryKey] && categories[categoryKey].length > 0) {
-                        allPhrases.push(...categories[categoryKey]);
-                    }
-                });
-                return allPhrases;
-            } else if (categories[selectedCategory] && categories[selectedCategory].length > 0) {
-                return categories[selectedCategory];
-            }
-
-            // Fallback para a primeira categoria disponível
-            const availableCategories = Object.keys(categories).filter(key =>
-                categories[key] && categories[key].length > 0
+          // Valida a estrutura do JSON
+          if (data && typeof data === 'object') {
+            // Verifica se tem pelo menos uma categoria válida
+            const hasValidCategory = Object.keys(data).some(key =>
+              Array.isArray(data[key]) && data[key].length > 0
             );
 
-            if (availableCategories.length > 0) {
-                return categories[availableCategories[0]];
+            if (hasValidCategory) {
+              categories = data;
+              categoriesLoaded = true;
+              console.log('✅ Frases carregadas do arquivo frases.json');
+              updateCategorySelector();
+              return true;
             }
-
-            // Último fallback - frases padrão mínimas
-            return [
-                ['Médico', 'hospital', 'cirurgia', 'enfermeiro', 'paciente'],
-                ['Jardim', 'flor', 'tesoura', 'terra', 'regador']
-            ];
+          }
         }
+      } catch (error) {
+        console.log('⚠️ Arquivo frases.json não encontrado, usando apenas 6 frases padrão do sistema');
+      }
 
-        function toast(msg, isTurnToast = false) {
-            const t = $('toast');
-            t.textContent = msg;
+      // Se falhar, usa apenas as 6 categorias padrão mínimas
+      categories = { ...defaultCategories };
+      categoriesLoaded = true;
+      console.log('📚 Usando frases padrão do sistema (6 frases disponíveis)');
+      updateCategorySelector();
+      return false;
+    }
 
-            if (isTurnToast) {
-                t.classList.add('turn-toast');
-            } else {
-                t.classList.remove('turn-toast');
-            }
+    // Variável global para armazenar a categoria selecionada na tela de boas-vindas
+    let selectedGameCategory = 'all';
 
-            t.classList.add('show');
-            setTimeout(() => {
-                t.classList.remove('show');
-                if (isTurnToast) {
-                    setTimeout(() => t.classList.remove('turn-toast'), 300);
-                }
-            }, isTurnToast ? 3000 : 2000);
+    function defaults() {
+      if (selectedGameCategory === 'all') {
+        // Combina todas as categorias disponíveis
+        const allPhrases = [];
+        Object.keys(categories).forEach(categoryKey => {
+          if (categories[categoryKey] && categories[categoryKey].length > 0) {
+            allPhrases.push(...categories[categoryKey]);
+          }
+        });
+        return allPhrases;
+      } else if (categories[selectedGameCategory] && categories[selectedGameCategory].length > 0) {
+        return categories[selectedGameCategory];
+      }
+
+      // Fallback para a primeira categoria disponível
+      const availableCategories = Object.keys(categories).filter(key =>
+        categories[key] && categories[key].length > 0
+      );
+
+      if (availableCategories.length > 0) {
+        return categories[availableCategories[0]];
+      }
+
+      // Último fallback - frases padrão mínimas
+      return [
+        ['Médico', 'hospital', 'cirurgia', 'enfermeiro', 'paciente'],
+        ['Jardim', 'flor', 'tesoura', 'terra', 'regador']
+      ];
+    }
+
+    function toast(msg, isTurnToast = false) {
+      const t = $('toast');
+      t.textContent = msg;
+
+      if (isTurnToast) {
+        t.classList.add('turn-toast');
+      } else {
+        t.classList.remove('turn-toast');
+      }
+
+      t.classList.add('show');
+      setTimeout(() => {
+        t.classList.remove('show');
+        if (isTurnToast) {
+          setTimeout(() => t.classList.remove('turn-toast'), 300);
         }
+      }, isTurnToast ? 3000 : 2000);
+    }
 
-        function penaltyToast(msg) {
-            const t = $('penaltyToast');
-            t.textContent = msg;
-            t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 5000);
+    function penaltyToast(msg) {
+      const t = $('penaltyToast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 5000);
+    }
+
+    function showSuccessEmoji() {
+      const successEmojis = ['🎉', '🥳', '🎊', '✨', '🌟', '💫', '🏆', '👏', '🎯', '💯'];
+      const randomEmoji = successEmojis[Math.floor(Math.random() * successEmojis.length)];
+
+      const emojiElement = document.createElement('div');
+      emojiElement.className = 'success-emoji';
+      emojiElement.textContent = randomEmoji;
+
+      document.body.appendChild(emojiElement);
+
+      setTimeout(() => {
+        document.body.removeChild(emojiElement);
+      }, 3000);
+    }
+
+    function updateScores() {
+      $('score1').textContent = scores[0];
+      $('score2').textContent = scores[1];
+    }
+
+    function makePalette() {
+      const p = $('palette');
+      p.innerHTML = '';
+      colors.forEach(color => {
+        const btn = document.createElement('div');
+        btn.className = 'color-btn';
+        btn.style.background = color;
+        btn.style.backgroundImage = color;
+        if (blocked.has(color)) btn.classList.add('blocked');
+        if (selectedColor === color) btn.classList.add('selected');
+
+        // Se já começou a pintar, desabilita outras cores visualmente
+        if (movesForCurrentColor > 0 && selectedColor !== color && !blocked.has(color)) {
+          btn.style.opacity = '0.3';
+          btn.style.cursor = 'not-allowed';
         }
+        btn.onclick = () => {
+          if (blocked.has(color)) {
+            toast('Cor já usada!');
+            return;
+          }
 
-        function showSuccessEmoji() {
-            const successEmojis = ['🎉', '🥳', '🎊', '✨', '🌟', '💫', '🏆', '👏', '🎯', '💯'];
-            const randomEmoji = successEmojis[Math.floor(Math.random() * successEmojis.length)];
+          // Se já começou a pintar com outra cor, não permite trocar
+          if (movesForCurrentColor > 0 && selectedColor !== color) {
+            toast(`Termine de pintar com a cor atual! (${movesForCurrentColor}/5)`);
+            return;
+          }
 
-            const emojiElement = document.createElement('div');
-            emojiElement.className = 'success-emoji';
-            emojiElement.textContent = randomEmoji;
-
-            document.body.appendChild(emojiElement);
-
-            setTimeout(() => {
-                document.body.removeChild(emojiElement);
-            }, 3000);
-        }
-
-        function updateScores() {
-            $('score1').textContent = scores[0];
-            $('score2').textContent = scores[1];
-        }
-
-        function makePalette() {
-            const p = $('palette');
-            p.innerHTML = '';
-            colors.forEach(color => {
-                const btn = document.createElement('div');
-                btn.className = 'color-btn';
-                btn.style.background = color;
-                btn.style.backgroundImage = color;
-                if (blocked.has(color)) btn.classList.add('blocked');
-                if (selectedColor === color) btn.classList.add('selected');
-
-                // Se já começou a pintar, desabilita outras cores visualmente
-                if (movesForCurrentColor > 0 && selectedColor !== color && !blocked.has(color)) {
-                    btn.style.opacity = '0.3';
-                    btn.style.cursor = 'not-allowed';
-                }
-                btn.onclick = () => {
-                    if (blocked.has(color)) {
-                        toast('Cor já usada!');
-                        return;
-                    }
-
-                    // Se já começou a pintar com outra cor, não permite trocar
-                    if (movesForCurrentColor > 0 && selectedColor !== color) {
-                        toast(`Termine de pintar com a cor atual! (${movesForCurrentColor}/5)`);
-                        return;
-                    }
-
-                    selectedColor = color;
-                    if (movesForCurrentColor === 0) {
-                        movesForCurrentColor = 0;
-                    }
-                    makePalette();
-                };
-                p.appendChild(btn);
-            });
-        }
-
-        let currentColorCells = [];
-        let usedColumnsInTurn = new Set();
-        let meaningMode = false;
-
-        function paintCell(cell) {
-            if (meaningMode) {
-                showMeaning(cell.textContent);
-                meaningMode = false;
-                $('meaningBtn').classList.remove('active');
-                return;
-            }
-
-            if (!selectedColor) {
-                toast('Selecione uma cor primeiro!');
-                return;
-            }
-            if (cell.classList.contains('painted')) {
-                toast('Célula já pintada!');
-                return;
-            }
-            if (movesForCurrentColor >= 5) {
-                toast('Limite de 5 células por cor!');
-                return;
-            }
-
-            const columnIndex = cell.dataset.pi;
-            if (usedColumnsInTurn.has(columnIndex)) {
-                toast('Apenas uma palavra por coluna no turno!');
-                return;
-            }
-
-            // Bloqueia o seletor de categoria após a primeira palavra pintada
-            if (paintedCount === 0) {
-                const categorySelect = $('categorySelect');
-                categorySelect.disabled = true;
-                categorySelect.style.opacity = '0.5';
-                categorySelect.style.cursor = 'not-allowed';
-                categorySelect.title = 'Categoria bloqueada durante a partida';
-            }
-
-            cell.style.background = selectedColor;
-            cell.style.backgroundImage = selectedColor;
-            cell.classList.add('painted');
-            cell.dataset.color = selectedColor;
-            movesForCurrentColor++;
-            paintedCount++;
-            currentColorCells.push(cell);
-            usedColumnsInTurn.add(columnIndex);
-
-            if (movesForCurrentColor === 5) {
-                const paintedWords = currentColorCells.map(c => ({
-                    word: c.textContent,
-                    fi: parseInt(c.dataset.fi),
-                    pi: parseInt(c.dataset.pi)
-                }));
-
-                const phraseIndices = new Set(paintedWords.map(w => w.fi));
-
-                let isValidPhrase = false;
-
-                if (phraseIndices.size === 1) {
-                    const fi = paintedWords[0].fi;
-                    const originalPhrase = phrases[fi];
-
-                    paintedWords.sort((a, b) => a.pi - b.pi);
-                    const paintedPhrase = paintedWords.map(w => w.word).join(' ');
-                    const correctPhrase = originalPhrase.join(' ');
-
-                    if (paintedPhrase === correctPhrase) {
-                        isValidPhrase = true;
-                        scores[currentPlayer] += 10;
-                        toast('🎉 Frase completa! +10 pontos!');
-                        showSuccessEmoji();
-                        updateScores();
-                    } else {
-                        toast('❌ Não existe esta frase!');
-                        clearCurrentColorCells();
-                    }
-                } else {
-                    toast('❌ Não existe esta frase!');
-                    clearCurrentColorCells();
-
-                    // Passa a vez para o próximo jogador
-                    currentPlayer = 1 - currentPlayer;
-                    updateActivePlayer();
-                    setTimeout(() => {
-                        toast(`Vez do(a) ${currentPlayer === 0 ? $('name1').textContent : $('name2').textContent}!`, true);
-                    }, 2100);
-                }
-
-                blocked.add(selectedColor);
-                selectedColor = null;
-                movesForCurrentColor = 0;
-                currentColorCells = [];
-                usedColumnsInTurn.clear();
-
-                if (isValidPhrase) {
-                    currentPlayer = 1 - currentPlayer;
-                    updateActivePlayer();
-                    setTimeout(() => {
-                        toast(`Vez do(a) ${currentPlayer === 0 ? $('name1').textContent : $('name2').textContent}!`, true);
-                    }, 2100);
-                }
-
-                makePalette();
-
-                // Verifica se todas as cores foram bloqueadas
-                if (blocked.size === colors.length) {
-                    setTimeout(() => {
-                        endGame();
-                    }, 2500);
-                }
-            }
-
-            if (paintedCount === 30) {
-                setTimeout(() => {
-                    endGame();
-                }, 2500);
-            }
-        }
-
-        function clearCurrentColorCells() {
-            currentColorCells.forEach(cell => {
-                cell.style.background = 'white';
-                cell.style.backgroundImage = 'none';
-                cell.classList.remove('painted');
-                delete cell.dataset.color;
-                paintedCount--;
-            });
-            usedColumnsInTurn.clear();
-        }
-
-        function updateActivePlayer() {
-            const label1 = $('label1');
-            const label2 = $('label2');
-            const name1 = $('name1');
-            const name2 = $('name2');
-
-            if (currentPlayer === 0) {
-                label1.classList.add('active');
-                label2.classList.remove('active');
-                name1.classList.add('active');
-                name2.classList.remove('active');
-            } else {
-                label2.classList.add('active');
-                label1.classList.remove('active');
-                name2.classList.add('active');
-                name1.classList.remove('active');
-            }
-        }
-
-        function endGame() {
-            saveGameToHistory();
-            showGameOverModal();
-        }
-
-        function showGameOverModal() {
-            const modal = $('gameOverModal');
-            const winnerText = $('gameOverWinner');
-            const player1Card = $('gameOverPlayer1');
-            const player2Card = $('gameOverPlayer2');
-
-            $('gameOverEmoji1').textContent = $('label1').textContent;
-            $('gameOverEmoji2').textContent = $('label2').textContent;
-            $('gameOverName1').textContent = $('name1').textContent;
-            $('gameOverName2').textContent = $('name2').textContent;
-            $('gameOverScore1').textContent = scores[0];
-            $('gameOverScore2').textContent = scores[1];
-
-            player1Card.classList.remove('winner');
-            player2Card.classList.remove('winner');
-
-            if (scores[0] > scores[1]) {
-                winnerText.textContent = `🏆 Vencedor: ${$('name1').textContent}`;
-                player1Card.classList.add('winner');
-            } else if (scores[1] > scores[0]) {
-                winnerText.textContent = `🏆 Vencedor: ${$('name2').textContent}`;
-                player2Card.classList.add('winner');
-            } else {
-                winnerText.textContent = '🤝 Empate!';
-            }
-
-            modal.classList.add('active');
-            overlay.classList.add('active');
-        }
-
-        function closeGameOverModal() {
-            $('gameOverModal').classList.remove('active');
-            overlay.classList.remove('active');
-        }
-
-        function playAgain() {
-            closeGameOverModal();
-            phrases = defaults();
-            blocked.clear();
-            selectedColor = null;
+          selectedColor = color;
+          if (movesForCurrentColor === 0) {
             movesForCurrentColor = 0;
-            paintedCount = 0;
-            scores = [0, 0];
-            currentPlayer = 0;
-            currentColorCells = [];
-            usedColumnsInTurn.clear();
-            meaningMode = false;
+          }
+          makePalette();
+        };
+        p.appendChild(btn);
+      });
+    }
 
-            // Desbloqueia o seletor de categoria
-            const categorySelect = $('categorySelect');
-            categorySelect.disabled = false;
-            categorySelect.style.opacity = '1';
-            categorySelect.style.cursor = 'pointer';
-            categorySelect.title = '';
+    let currentColorCells = [];
+    let usedColumnsInTurn = new Set();
+    let meaningMode = false;
 
-            const meaningBtn = $('meaningBtn');
-            if (meaningBtn) {
-                meaningBtn.classList.remove('active');
-                meaningBtn.style.background = 'linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)';
-                meaningBtn.style.animation = '';
-            }
+    function paintCell(cell) {
+      if (meaningMode) {
+        showMeaning(cell.textContent);
+        meaningMode = false;
+        $('meaningBtn').classList.remove('active');
+        return;
+      }
 
-            buildGrid();
-            makePalette();
+      if (!selectedColor) {
+        toast('Selecione uma cor primeiro!');
+        return;
+      }
+      if (cell.classList.contains('painted')) {
+        toast('Célula já pintada!');
+        return;
+      }
+      if (movesForCurrentColor >= 5) {
+        toast('Limite de 5 células por cor!');
+        return;
+      }
+
+      const columnIndex = cell.dataset.pi;
+      if (usedColumnsInTurn.has(columnIndex)) {
+        toast('Apenas uma palavra por coluna no turno!');
+        return;
+      }
+
+      cell.style.background = selectedColor;
+      cell.style.backgroundImage = selectedColor;
+      cell.classList.add('painted');
+      cell.dataset.color = selectedColor;
+      movesForCurrentColor++;
+      paintedCount++;
+      currentColorCells.push(cell);
+      usedColumnsInTurn.add(columnIndex);
+
+      if (movesForCurrentColor === 5) {
+        const paintedWords = currentColorCells.map(c => ({
+          word: c.textContent,
+          fi: parseInt(c.dataset.fi),
+          pi: parseInt(c.dataset.pi)
+        }));
+
+        const phraseIndices = new Set(paintedWords.map(w => w.fi));
+
+        let isValidPhrase = false;
+
+        if (phraseIndices.size === 1) {
+          const fi = paintedWords[0].fi;
+          const originalPhrase = phrases[fi];
+
+          paintedWords.sort((a, b) => a.pi - b.pi);
+          const paintedPhrase = paintedWords.map(w => w.word).join(' ');
+          const correctPhrase = originalPhrase.join(' ');
+
+          if (paintedPhrase === correctPhrase) {
+            isValidPhrase = true;
+            scores[currentPlayer] += 10;
+            toast('🎉 Frase completa! +10 pontos!');
+            showSuccessEmoji();
             updateScores();
-            updateActivePlayer();
-            toast('Nova partida iniciada!');
+          } else {
+            toast('❌ Não existe esta frase!');
+            clearCurrentColorCells();
+          }
+        } else {
+          toast('❌ Não existe esta frase!');
+          clearCurrentColorCells();
+
+          // Passa a vez para o próximo jogador
+          currentPlayer = 1 - currentPlayer;
+          updateActivePlayer();
+          setTimeout(() => {
+            toast(`Vez do(a) ${currentPlayer === 0 ? $('name1').textContent : $('name2').textContent}!`, true);
+          }, 2100);
         }
 
-        function newPlayers() {
-            closeGameOverModal();
-            $('gamePanel').style.display = 'none';
-            $('setupPanel').style.display = 'block';
-            $('historyIcon').style.display = 'none';
+        blocked.add(selectedColor);
+        selectedColor = null;
+        movesForCurrentColor = 0;
+        currentColorCells = [];
+        usedColumnsInTurn.clear();
 
-            // Desbloqueia o seletor de categoria
-            const categorySelect = $('categorySelect');
-            categorySelect.disabled = false;
-            categorySelect.style.opacity = '1';
-            categorySelect.style.cursor = 'pointer';
-            categorySelect.title = '';
-
-            phrases = [];
-            blocked.clear();
-            selectedColor = null;
-            movesForCurrentColor = 0;
-            paintedCount = 0;
-            scores = [0, 0];
-            currentPlayer = 0;
-            currentColorCells = [];
-            usedColumnsInTurn.clear();
-            meaningMode = false;
+        if (isValidPhrase) {
+          currentPlayer = 1 - currentPlayer;
+          updateActivePlayer();
+          setTimeout(() => {
+            toast(`Vez do(a) ${currentPlayer === 0 ? $('name1').textContent : $('name2').textContent}!`, true);
+          }, 2100);
         }
 
-        function saveGameToHistory() {
-            const history = JSON.parse(localStorage.getItem('gameHistory') || '[]');
+        makePalette();
 
-            const gameRecord = {
-                date: new Date().toISOString(),
-                player1: $('name1').textContent,
-                player2: $('name2').textContent,
-                score1: scores[0],
-                score2: scores[1],
-                winner: scores[0] > scores[1] ? 'player1' : scores[1] > scores[0] ? 'player2' : 'tie'
-            };
+        // Verifica se todas as cores foram bloqueadas
+        if (blocked.size === colors.length) {
+          setTimeout(() => {
+            endGame();
+          }, 2500);
+        }
+      }
 
-            history.unshift(gameRecord);
+      if (paintedCount === 30) {
+        setTimeout(() => {
+          endGame();
+        }, 2500);
+      }
+    }
 
-            if (history.length > 50) {
-                history.pop();
-            }
+    function clearCurrentColorCells() {
+      currentColorCells.forEach(cell => {
+        cell.style.background = 'white';
+        cell.style.backgroundImage = 'none';
+        cell.classList.remove('painted');
+        delete cell.dataset.color;
+        paintedCount--;
+      });
+      usedColumnsInTurn.clear();
+    }
 
-            localStorage.setItem('gameHistory', JSON.stringify(history));
+    function updateActivePlayer() {
+      const label1 = $('label1');
+      const label2 = $('label2');
+      const name1 = $('name1');
+      const name2 = $('name2');
+
+      if (currentPlayer === 0) {
+        label1.classList.add('active');
+        label2.classList.remove('active');
+        name1.classList.add('active');
+        name2.classList.remove('active');
+      } else {
+        label2.classList.add('active');
+        label1.classList.remove('active');
+        name2.classList.add('active');
+        name1.classList.remove('active');
+      }
+    }
+
+    function endGame() {
+      saveGameToHistory();
+      showGameOverModal();
+    }
+
+    function showGameOverModal() {
+      const modal = $('gameOverModal');
+      const winnerText = $('gameOverWinner');
+      const player1Card = $('gameOverPlayer1');
+      const player2Card = $('gameOverPlayer2');
+
+      $('gameOverEmoji1').textContent = $('label1').textContent;
+      $('gameOverEmoji2').textContent = $('label2').textContent;
+      $('gameOverName1').textContent = $('name1').textContent;
+      $('gameOverName2').textContent = $('name2').textContent;
+      $('gameOverScore1').textContent = scores[0];
+      $('gameOverScore2').textContent = scores[1];
+
+      player1Card.classList.remove('winner');
+      player2Card.classList.remove('winner');
+
+      if (scores[0] > scores[1]) {
+        winnerText.textContent = `🏆 Vencedor: ${$('name1').textContent}`;
+        player1Card.classList.add('winner');
+      } else if (scores[1] > scores[0]) {
+        winnerText.textContent = `🏆 Vencedor: ${$('name2').textContent}`;
+        player2Card.classList.add('winner');
+      } else {
+        winnerText.textContent = '🤝 Empate!';
+      }
+
+      modal.classList.add('active');
+      overlay.classList.add('active');
+    }
+
+    function closeGameOverModal() {
+      $('gameOverModal').classList.remove('active');
+      overlay.classList.remove('active');
+    }
+
+    function playAgain() {
+      closeGameOverModal();
+
+      phrases = defaults();
+      blocked.clear();
+      selectedColor = null;
+      movesForCurrentColor = 0;
+      paintedCount = 0;
+      scores = [0, 0];
+      currentPlayer = 0;
+      currentColorCells = [];
+      usedColumnsInTurn.clear();
+      meaningMode = false;
+
+      const meaningBtn = $('meaningBtn');
+      if (meaningBtn) {
+        meaningBtn.classList.remove('active');
+        meaningBtn.style.background = 'linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)';
+        meaningBtn.style.animation = '';
+      }
+
+      buildGrid();
+      makePalette();
+      updateScores();
+      updateActivePlayer();
+      toast('Nova partida iniciada!');
+    }
+
+    function newPlayers() {
+      closeGameOverModal();
+      $('gamePanel').style.display = 'none';
+      $('setupPanel').style.display = 'none';
+      $('welcomePanel').style.display = 'block';
+      $('historyIcon').style.display = 'none';
+
+      phrases = [];
+      blocked.clear();
+      selectedColor = null;
+      movesForCurrentColor = 0;
+      paintedCount = 0;
+      scores = [0, 0];
+      currentPlayer = 0;
+      currentColorCells = [];
+      usedColumnsInTurn.clear();
+      meaningMode = false;
+    }
+
+    function saveGameToHistory() {
+      const history = JSON.parse(localStorage.getItem('gameHistory') || '[]');
+
+      const gameRecord = {
+        date: new Date().toISOString(),
+        player1: $('name1').textContent,
+        player2: $('name2').textContent,
+        score1: scores[0],
+        score2: scores[1],
+        winner: scores[0] > scores[1] ? 'player1' : scores[1] > scores[0] ? 'player2' : 'tie'
+      };
+
+      history.unshift(gameRecord);
+
+      if (history.length > 50) {
+        history.pop();
+      }
+
+      localStorage.setItem('gameHistory', JSON.stringify(history));
+    }
+
+    function loadHistory() {
+      const history = JSON.parse(localStorage.getItem('gameHistory') || '[]');
+      const historyList = $('historyList');
+
+      if (history.length === 0) {
+        historyList.innerHTML = '<div class="no-history">Nenhuma partida registrada ainda.<br>Jogue para começar seu histórico! 🎮</div>';
+        $('totalGames').textContent = '0';
+        $('player1Wins').textContent = '0';
+        $('player2Wins').textContent = '0';
+        return;
+      }
+
+      let player1Wins = 0;
+      let player2Wins = 0;
+
+      historyList.innerHTML = '';
+
+      history.forEach((game, index) => {
+        if (game.winner === 'player1') player1Wins++;
+        if (game.winner === 'player2') player2Wins++;
+
+        const item = document.createElement('div');
+        item.className = 'history-item';
+
+        if (game.winner !== 'tie') {
+          item.classList.add('history-winner');
         }
 
-        function loadHistory() {
-            const history = JSON.parse(localStorage.getItem('gameHistory') || '[]');
-            const historyList = $('historyList');
+        const date = new Date(game.date);
+        const dateStr = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        const timeStr = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
-            if (history.length === 0) {
-                historyList.innerHTML = '<div class="no-history">Nenhuma partida registrada ainda.<br>Jogue para começar seu histórico! 🎮</div>';
-                $('totalGames').textContent = '0';
-                $('player1Wins').textContent = '0';
-                $('player2Wins').textContent = '0';
-                return;
-            }
+        const winnerEmoji = game.winner === 'player1' ? '🏆' : game.winner === 'player2' ? '🏆' : '🤝';
 
-            let player1Wins = 0;
-            let player2Wins = 0;
-
-            historyList.innerHTML = '';
-
-            history.forEach((game, index) => {
-                if (game.winner === 'player1') player1Wins++;
-                if (game.winner === 'player2') player2Wins++;
-
-                const item = document.createElement('div');
-                item.className = 'history-item';
-
-                if (game.winner !== 'tie') {
-                    item.classList.add('history-winner');
-                }
-
-                const date = new Date(game.date);
-                const dateStr = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-                const timeStr = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-
-                const winnerEmoji = game.winner === 'player1' ? '🏆' : game.winner === 'player2' ? '🏆' : '🤝';
-
-                item.innerHTML = `
+        item.innerHTML = `
           <div style="flex: 1;">
             <div class="history-players">${winnerEmoji} ${game.player1} vs ${game.player2}</div>
             <div class="history-date">${dateStr} às ${timeStr}</div>
@@ -1075,30 +1999,30 @@
           <div class="history-score">${game.score1} - ${game.score2}</div>
         `;
 
-                historyList.appendChild(item);
-            });
+        historyList.appendChild(item);
+      });
 
-            $('totalGames').textContent = history.length;
-            $('player1Wins').textContent = player1Wins;
-            $('player2Wins').textContent = player2Wins;
-        }
+      $('totalGames').textContent = history.length;
+      $('player1Wins').textContent = player1Wins;
+      $('player2Wins').textContent = player2Wins;
+    }
 
-        function openHistory() {
-            loadHistory();
-            $('historyModal').classList.add('active');
-            overlay.classList.add('active');
-        }
+    function openHistory() {
+      loadHistory();
+      $('historyModal').classList.add('active');
+      overlay.classList.add('active');
+    }
 
-        function closeHistory() {
-            $('historyModal').classList.remove('active');
-            overlay.classList.remove('active');
-        }
+    function closeHistory() {
+      $('historyModal').classList.remove('active');
+      overlay.classList.remove('active');
+    }
 
-        function clearHistory() {
-            const historyList = $('historyList');
-            const confirmDiv = document.createElement('div');
-            confirmDiv.style.cssText = 'text-align: center; padding: 20px;';
-            confirmDiv.innerHTML = `
+    function clearHistory() {
+      const historyList = $('historyList');
+      const confirmDiv = document.createElement('div');
+      confirmDiv.style.cssText = 'text-align: center; padding: 20px;';
+      confirmDiv.innerHTML = `
         <p style="margin-bottom: 16px; color: #2d3748; font-weight: 600;">Tem certeza que deseja limpar todo o histórico?</p>
         <div style="display: flex; gap: 8px;">
           <button id="confirmClear" class="history-btn history-btn-clear" style="flex: 1;">Sim, limpar</button>
@@ -1106,356 +2030,372 @@
         </div>
       `;
 
-            $('historyList').innerHTML = '';
-            $('historyList').appendChild(confirmDiv);
+      $('historyList').innerHTML = '';
+      $('historyList').appendChild(confirmDiv);
 
-            $('confirmClear').onclick = () => {
-                localStorage.removeItem('gameHistory');
-                loadHistory();
-                toast('Histórico limpo!');
-            };
+      $('confirmClear').onclick = () => {
+        localStorage.removeItem('gameHistory');
+        loadHistory();
+        toast('Histórico limpo!');
+      };
 
-            $('cancelClear').onclick = () => {
-                loadHistory();
-            };
-        }
+      $('cancelClear').onclick = () => {
+        loadHistory();
+      };
+    }
 
-        $('historyIcon').addEventListener('click', openHistory);
-        $('closeHistory').addEventListener('click', closeHistory);
-        $('clearHistory').addEventListener('click', clearHistory);
-        $('playAgainBtn').addEventListener('click', playAgain);
-        $('newPlayersBtn').addEventListener('click', newPlayers);
+    $('historyIcon').addEventListener('click', openHistory);
+    $('closeHistory').addEventListener('click', closeHistory);
+    $('clearHistory').addEventListener('click', clearHistory);
+    $('playAgainBtn').addEventListener('click', playAgain);
+    $('newPlayersBtn').addEventListener('click', newPlayers);
 
-        async function showMeaning(word) {
-            const modal = $('meaningModal');
-            const title = $('meaningTitle');
-            const content = $('meaningContent');
+    async function showMeaning(word) {
+      const modal = $('meaningModal');
+      const title = $('meaningTitle');
+      const content = $('meaningContent');
 
-            // Desconta 5 pontos do jogador atual
-            scores[currentPlayer] = Math.max(0, scores[currentPlayer] - 5);
-            updateScores();
-            penaltyToast('⚠️ -5 PONTOS!');
+      // Desconta 5 pontos do jogador atual
+      scores[currentPlayer] = Math.max(0, scores[currentPlayer] - 5);
+      updateScores();
+      penaltyToast('⚠️ -5 PONTOS!');
 
-            title.textContent = `📖 ${word}`;
-            content.innerHTML = '<div class="meaning-loading">🔍 Buscando significado...</div>';
+      title.textContent = `📖 ${word}`;
+      content.innerHTML = '<div class="meaning-loading">🔍 Buscando significado...</div>';
 
-            modal.classList.add('active');
-            overlay.classList.add('active');
+      modal.classList.add('active');
+      overlay.classList.add('active');
 
-            try {
-                const response = await fetch(`https://api.dicionario-aberto.net/word/${encodeURIComponent(word)}`);
+      try {
+        const response = await fetch(`https://api.dicionario-aberto.net/word/${encodeURIComponent(word)}`);
 
-                if (response.ok) {
-                    const data = await response.json();
+        if (response.ok) {
+          const data = await response.json();
 
-                    if (data && data.length > 0) {
-                        let meaningHTML = '';
+          if (data && data.length > 0) {
+            let meaningHTML = '';
 
-                        data.slice(0, 3).forEach((entry, index) => {
-                            if (entry.xml) {
-                                const parser = new DOMParser();
-                                const xmlDoc = parser.parseFromString(entry.xml, 'text/xml');
-                                const meanings = xmlDoc.getElementsByTagName('sense');
+            data.slice(0, 3).forEach((entry, index) => {
+              if (entry.xml) {
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(entry.xml, 'text/xml');
+                const meanings = xmlDoc.getElementsByTagName('sense');
 
-                                if (meanings.length > 0) {
-                                    for (let i = 0; i < Math.min(meanings.length, 2); i++) {
-                                        const def = meanings[i].getElementsByTagName('def')[0];
-                                        if (def && def.textContent) {
-                                            meaningHTML += `<p style="margin-bottom: 12px;"><strong>${index + 1}.${i + 1}</strong> ${def.textContent}</p>`;
-                                        }
-                                    }
-                                }
-                            }
-                        });
-
-                        if (meaningHTML) {
-                            content.innerHTML = meaningHTML;
-                        } else {
-                            content.innerHTML = `<p style="text-align: center; color: #6c757d;">Significado não encontrado para "<strong>${word}</strong>".</p><p style="text-align: center; margin-top: 12px; font-size: 13px;">Tente pesquisar em um dicionário online.</p>`;
-                        }
-                    } else {
-                        content.innerHTML = `<p style="text-align: center; color: #6c757d;">Significado não encontrado para "<strong>${word}</strong>".</p><p style="text-align: center; margin-top: 12px; font-size: 13px;">Tente pesquisar em um dicionário online.</p>`;
+                if (meanings.length > 0) {
+                  for (let i = 0; i < Math.min(meanings.length, 2); i++) {
+                    const def = meanings[i].getElementsByTagName('def')[0];
+                    if (def && def.textContent) {
+                      meaningHTML += `<p style="margin-bottom: 12px;"><strong>${index + 1}.${i + 1}</strong> ${def.textContent}</p>`;
                     }
-                } else {
-                    content.innerHTML = `<p style="text-align: center; color: #6c757d;">Não foi possível buscar o significado no momento.</p><p style="text-align: center; margin-top: 12px; font-size: 13px;">Verifique sua conexão e tente novamente.</p>`;
+                  }
                 }
-            } catch (error) {
-                content.innerHTML = `<p style="text-align: center; color: #6c757d;">Erro ao buscar significado.</p><p style="text-align: center; margin-top: 12px; font-size: 13px;">Verifique sua conexão com a internet.</p>`;
-            }
-        }
-
-        function closeMeaningModal() {
-            $('meaningModal').classList.remove('active');
-            if (!$('historyModal').classList.contains('active') && emojiPicker.style.display !== 'block') {
-                overlay.classList.remove('active');
-            }
-
-            // Reseta o modo significado
-            meaningMode = false;
-            const meaningBtn = $('meaningBtn');
-            if (meaningBtn) {
-                meaningBtn.classList.remove('active');
-                meaningBtn.style.background = 'linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)';
-                meaningBtn.style.animation = '';
-            }
-
-            // Passa a vez para o próximo jogador
-            currentPlayer = 1 - currentPlayer;
-            updateActivePlayer();
-            toast(`Vez do(a) ${currentPlayer === 0 ? $('name1').textContent : $('name2').textContent}!`, true);
-        }
-
-        $('closeMeaning').addEventListener('click', closeMeaningModal);
-
-        function selectValidPhrases() {
-            const allPhrases = defaults();
-            const MAX_ROWS = 6;
-            const MAX_COLS = 5;
-            const MAX_ATTEMPTS = 100;
-
-            for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
-                const shuffledPhrases = shuffle(allPhrases);
-                const candidatePhrases = shuffledPhrases.slice(0, MAX_ROWS);
-
-                let hasConflict = false;
-
-                for (let col = 0; col < MAX_COLS; col++) {
-                    const wordsInColumn = new Set();
-
-                    for (let row = 0; row < candidatePhrases.length; row++) {
-                        const word = candidatePhrases[row][col];
-                        if (wordsInColumn.has(word)) {
-                            hasConflict = true;
-                            break;
-                        }
-                        wordsInColumn.add(word);
-                    }
-
-                    if (hasConflict) break;
-                }
-
-                if (!hasConflict) {
-                    return candidatePhrases;
-                }
-            }
-
-            toast('⚠️ Dificuldade em evitar duplicatas. Tente reiniciar!');
-            return allPhrases.slice(0, MAX_ROWS);
-        }
-
-        function buildGrid() {
-            const g = $('grid');
-            g.innerHTML = '';
-
-            const MAX_ROWS = 6;
-            const MAX_COLS = 5;
-
-            const selectedPhrases = selectValidPhrases();
-            phrases = selectedPhrases;
-            const columns = [[], [], [], [], []];
-
-            selectedPhrases.forEach((frase, fi) => {
-                frase.slice(0, MAX_COLS).forEach((word, pi) => {
-                    columns[pi].push({ w: word, fi, pi });
-                });
+              }
             });
 
-            for (let i = 1; i < columns.length; i++) {
-                columns[i] = shuffle(columns[i]);
+            if (meaningHTML) {
+              content.innerHTML = meaningHTML;
+            } else {
+              content.innerHTML = `<p style="text-align: center; color: #6c757d;">Significado não encontrado para "<strong>${word}</strong>".</p><p style="text-align: center; margin-top: 12px; font-size: 13px;">Tente pesquisar em um dicionário online.</p>`;
             }
+          } else {
+            content.innerHTML = `<p style="text-align: center; color: #6c757d;">Significado não encontrado para "<strong>${word}</strong>".</p><p style="text-align: center; margin-top: 12px; font-size: 13px;">Tente pesquisar em um dicionário online.</p>`;
+          }
+        } else {
+          content.innerHTML = `<p style="text-align: center; color: #6c757d;">Não foi possível buscar o significado no momento.</p><p style="text-align: center; margin-top: 12px; font-size: 13px;">Verifique sua conexão e tente novamente.</p>`;
+        }
+      } catch (error) {
+        content.innerHTML = `<p style="text-align: center; color: #6c757d;">Erro ao buscar significado.</p><p style="text-align: center; margin-top: 12px; font-size: 13px;">Verifique sua conexão com a internet.</p>`;
+      }
+    }
 
-            for (let row = 0; row < MAX_ROWS; row++) {
-                for (let col = 0; col < MAX_COLS; col++) {
-                    const cellData = columns[col][row];
-                    if (!cellData) continue;
+    function closeMeaningModal() {
+      $('meaningModal').classList.remove('active');
+      if (!$('historyModal').classList.contains('active') && emojiPicker.style.display !== 'block') {
+        overlay.classList.remove('active');
+      }
 
-                    const c = document.createElement('div');
-                    c.className = 'cell';
-                    c.textContent = cellData.w;
-                    c.dataset.fi = cellData.fi;
-                    c.dataset.pi = cellData.pi;
-                    c.onclick = () => paintCell(c);
-                    g.appendChild(c);
-                }
+      // Reseta o modo significado
+      meaningMode = false;
+      const meaningBtn = $('meaningBtn');
+      if (meaningBtn) {
+        meaningBtn.classList.remove('active');
+        meaningBtn.style.background = 'linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)';
+        meaningBtn.style.animation = '';
+      }
+
+      // Passa a vez para o próximo jogador
+      currentPlayer = 1 - currentPlayer;
+      updateActivePlayer();
+      toast(`Vez do(a) ${currentPlayer === 0 ? $('name1').textContent : $('name2').textContent}!`, true);
+    }
+
+    $('closeMeaning').addEventListener('click', closeMeaningModal);
+
+    function selectValidPhrases() {
+      const allPhrases = defaults();
+      const MAX_ROWS = 6;
+      const MAX_COLS = 5;
+      const MAX_ATTEMPTS = 100;
+
+      for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+        const shuffledPhrases = shuffle(allPhrases);
+        const candidatePhrases = shuffledPhrases.slice(0, MAX_ROWS);
+
+        let hasConflict = false;
+
+        for (let col = 0; col < MAX_COLS; col++) {
+          const wordsInColumn = new Set();
+
+          for (let row = 0; row < candidatePhrases.length; row++) {
+            const word = candidatePhrases[row][col];
+            if (wordsInColumn.has(word)) {
+              hasConflict = true;
+              break;
             }
+            wordsInColumn.add(word);
+          }
 
-            if (!document.getElementById('btnResetWords')) {
-                const buttonContainer = document.createElement('div');
-                buttonContainer.style.cssText = 'display: flex; gap: 8px; margin-top: 10px;';
-
-                const meaningBtn = document.createElement('button');
-                meaningBtn.textContent = '📖 Significado';
-                meaningBtn.className = 'btn small';
-                meaningBtn.id = 'meaningBtn';
-                meaningBtn.style.background = 'linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)';
-                meaningBtn.style.boxShadow = '0 2px 8px rgba(79, 70, 229, 0.3)';
-                meaningBtn.style.flex = '1';
-
-                meaningBtn.onclick = () => {
-                    // Verifica se o jogador atual tem pelo menos 5 pontos
-                    if (scores[currentPlayer] < 5) {
-                        toast('❌ Você precisa de pelo menos 5 pontos para usar o significado!');
-                        return;
-                    }
-
-                    if (meaningMode) {
-                        meaningMode = false;
-                        meaningBtn.classList.remove('active');
-                        meaningBtn.style.background = 'linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)';
-                        meaningBtn.style.animation = '';
-                        toast('Modo significado cancelado');
-                    } else {
-                        meaningMode = true;
-                        meaningBtn.classList.add('active');
-                        meaningBtn.style.background = 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)';
-                        meaningBtn.style.animation = 'pulse 1s infinite';
-                        toast('Agora escolha a palavra para verificar seu significado');
-
-                        setTimeout(() => {
-                            if (meaningMode) {
-                                meaningBtn.classList.remove('active');
-                                meaningBtn.style.background = 'linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)';
-                                meaningBtn.style.animation = '';
-                            }
-                        }, 3000);
-                    }
-                };
-
-                const resetBtn = document.createElement('button');
-                resetBtn.textContent = '🔄 Reiniciar Palavras';
-                resetBtn.className = 'btn small';
-                resetBtn.id = 'btnResetWords';
-                resetBtn.style.flex = '1';
-
-                resetBtn.onclick = () => {
-                    // Desbloqueia o seletor de categoria
-                    const categorySelect = $('categorySelect');
-                    categorySelect.disabled = false;
-                    categorySelect.style.opacity = '1';
-                    categorySelect.style.cursor = 'pointer';
-                    categorySelect.title = '';
-
-                    phrases = defaults();
-                    blocked.clear();
-                    selectedColor = null;
-                    movesForCurrentColor = 0;
-                    paintedCount = 0;
-                    scores = [0, 0];
-                    currentPlayer = 0;
-                    currentColorCells = [];
-                    usedColumnsInTurn.clear();
-                    buildGrid();
-                    makePalette();
-                    updateScores();
-                    updateActivePlayer();
-                    toast('Nova rodada iniciada!');
-                };
-
-                buttonContainer.appendChild(meaningBtn);
-                buttonContainer.appendChild(resetBtn);
-                g.parentNode.appendChild(buttonContainer);
-            }
+          if (hasConflict) break;
         }
 
-        function startGame() {
-            const p1Name = $('p1').value.trim();
-            const p2Name = $('p2').value.trim();
-            const p1Year = $('year1').value;
-            const p1Class = $('class1').value;
-            const p2Year = $('year2').value;
-            const p2Class = $('class2').value;
-
-            if (!p1Name || !p2Name || !p1Year || !p1Class || !p2Year || !p2Class) {
-                const button = $('btnStart');
-                const originalText = button.textContent;
-                button.textContent = '⚠️ Preencha todos os campos!';
-                button.style.background = 'linear-gradient(135deg, #f5576c 0%, #f093fb 100%)';
-
-                setTimeout(() => {
-                    button.textContent = originalText;
-                    const config = window.elementSdk?.config || defaultConfig;
-                    const buttonColor = config.button_color || defaultConfig.button_color;
-                    const accentColor = config.accent_color || defaultConfig.accent_color;
-                    button.style.background = `linear-gradient(135deg, ${buttonColor} 0%, ${accentColor} 100%)`;
-                }, 2000);
-                return;
-            }
-
-            $('name1').textContent = `${p1Name} (${p1Year} ${p1Class})`;
-            $('name2').textContent = `${p2Name} (${p2Year} ${p2Class})`;
-            $('label1').textContent = emojiP1;
-            $('label2').textContent = emojiP2;
-
-            $('setupPanel').style.display = 'none';
-            $('gamePanel').style.display = 'block';
-            $('historyIcon').style.display = 'flex';
-
-            phrases = defaults();
-            buildGrid();
-            makePalette();
-            updateScores();
-            updateActivePlayer();
+        if (!hasConflict) {
+          return candidatePhrases;
         }
+      }
 
-        $('btnStart').addEventListener('click', startGame);
+      toast('⚠️ Dificuldade em evitar duplicatas. Tente reiniciar!');
+      return allPhrases.slice(0, MAX_ROWS);
+    }
 
-        $('categorySelect').addEventListener('change', () => {
-            const selectedCategory = $('categorySelect').value;
-            const categoryNames = {
-                'all': 'Todas (Aleatório)',
-                'association': 'Associação',
-                'rhymes': 'Rimas',
-                'frases_simples': 'Frases Simples',
-                'digrafo_s': 'Dígrafo e "S"'
-            };
+    function buildGrid() {
+      const g = $('grid');
+      g.innerHTML = '';
 
-            // Verifica se a categoria selecionada tem frases disponíveis
-            if (selectedCategory !== 'all' && (!categories[selectedCategory] || categories[selectedCategory].length === 0)) {
-                toast('⚠️ Esta categoria não possui frases disponíveis!');
-                // Volta para "Todas"
-                $('categorySelect').value = 'all';
-                return;
-            }
+      const MAX_ROWS = 6;
+      const MAX_COLS = 5;
 
-            // Reseta o jogo com a nova categoria
-            phrases = defaults();
-            blocked.clear();
-            selectedColor = null;
-            movesForCurrentColor = 0;
-            paintedCount = 0;
-            scores = [0, 0];
-            currentPlayer = 0;
-            currentColorCells = [];
-            usedColumnsInTurn.clear();
+      const selectedPhrases = selectValidPhrases();
+      phrases = selectedPhrases;
+      const columns = [[], [], [], [], []];
+
+      selectedPhrases.forEach((frase, fi) => {
+        frase.slice(0, MAX_COLS).forEach((word, pi) => {
+          columns[pi].push({ w: word, fi, pi });
+        });
+      });
+
+      for (let i = 1; i < columns.length; i++) {
+        columns[i] = shuffle(columns[i]);
+      }
+
+      for (let row = 0; row < MAX_ROWS; row++) {
+        for (let col = 0; col < MAX_COLS; col++) {
+          const cellData = columns[col][row];
+          if (!cellData) continue;
+
+          const c = document.createElement('div');
+          c.className = 'cell';
+          c.textContent = cellData.w;
+          c.dataset.fi = cellData.fi;
+          c.dataset.pi = cellData.pi;
+          c.onclick = () => paintCell(c);
+          g.appendChild(c);
+        }
+      }
+
+      if (!document.getElementById('btnResetWords')) {
+        const buttonContainer = document.createElement('div');
+        buttonContainer.style.cssText = 'display: flex; gap: 8px; margin-top: 10px;';
+
+        const meaningBtn = document.createElement('button');
+        meaningBtn.textContent = '📖 Significado';
+        meaningBtn.className = 'btn small';
+        meaningBtn.id = 'meaningBtn';
+        meaningBtn.style.background = 'linear-gradient(135deg, #D95221 0%, #FC8E45 100%)';
+        meaningBtn.style.boxShadow = '0 2px 8px rgba(243, 112, 72, 0.3)';
+        meaningBtn.style.flex = '1';
+
+        meaningBtn.onclick = () => {
+          // Verifica se o jogador atual tem pelo menos 5 pontos
+          if (scores[currentPlayer] < 5) {
+            toast('❌ Você precisa de pelo menos 5 pontos para usar o significado!');
+            return;
+          }
+
+          if (meaningMode) {
             meaningMode = false;
+            meaningBtn.classList.remove('active');
+            meaningBtn.style.background = 'linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)';
+            meaningBtn.style.animation = '';
+            toast('Modo significado cancelado');
+          } else {
+            meaningMode = true;
+            meaningBtn.classList.add('active');
+            meaningBtn.style.background = 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)';
+            meaningBtn.style.animation = 'pulse 1s infinite';
+            toast('Agora escolha a palavra para verificar seu significado');
 
-            // Remove o modo significado se estiver ativo
-            const meaningBtn = $('meaningBtn');
-            if (meaningBtn) {
+            setTimeout(() => {
+              if (meaningMode) {
                 meaningBtn.classList.remove('active');
                 meaningBtn.style.background = 'linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)';
                 meaningBtn.style.animation = '';
-            }
+              }
+            }, 3000);
+          }
+        };
 
-            buildGrid();
-            makePalette();
-            updateScores();
-            updateActivePlayer();
+        const resetBtn = document.createElement('button');
+        resetBtn.textContent = '🔄 Reiniciar Palavras';
+        resetBtn.className = 'btn small';
+        resetBtn.id = 'btnResetWords';
+        resetBtn.style.flex = '1';
 
-            const categoryDisplayName = categoryNames[selectedCategory] || selectedCategory;
-            const phraseCount = selectedCategory === 'all' ?
-                Object.values(categories).reduce((total, cat) => total + (cat ? cat.length : 0), 0) :
-                categories[selectedCategory].length;
+        resetBtn.onclick = () => {
+          phrases = defaults();
+          blocked.clear();
+          selectedColor = null;
+          movesForCurrentColor = 0;
+          paintedCount = 0;
+          scores = [0, 0];
+          currentPlayer = 0;
+          currentColorCells = [];
+          usedColumnsInTurn.clear();
+          buildGrid();
+          makePalette();
+          updateScores();
+          updateActivePlayer();
+          toast('Nova rodada iniciada!');
+        };
 
-            toast(`📚 ${categoryDisplayName} carregada! (${phraseCount} frases)`);
-        });
+        buttonContainer.appendChild(meaningBtn);
+        buttonContainer.appendChild(resetBtn);
+        g.parentNode.appendChild(buttonContainer);
+      }
+    }
 
-        populateEmojiPicker();
+    function startGame() {
+      const p1Name = $('p1').value.trim();
+      const p2Name = $('p2').value.trim();
+      const p1Year = $('year1').value;
+      const p1Class = $('class1').value;
+      const p2Year = $('year2').value;
+      const p2Class = $('class2').value;
 
-        // Carrega as frases do JSON ao iniciar
-        loadPhrasesFromJSON();
-    </script>
-    <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'99f86a5314271af2',t:'MTc2MzMxMTA3MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
+      if (!p1Name || !p2Name || !p1Year || !p1Class || !p2Year || !p2Class) {
+        const button = $('btnStart');
+        const originalText = button.textContent;
+        button.textContent = '⚠️ Preencha todos os campos!';
+        button.style.background = 'linear-gradient(135deg, #f5576c 0%, #f093fb 100%)';
+
+        setTimeout(() => {
+          button.textContent = originalText;
+          const config = window.elementSdk?.config || defaultConfig;
+          const buttonColor = config.button_color || defaultConfig.button_color;
+          const accentColor = config.accent_color || defaultConfig.accent_color;
+          button.style.background = `linear-gradient(135deg, ${buttonColor} 0%, ${accentColor} 100%)`;
+        }, 2000);
+        return;
+      }
+
+      $('name1').textContent = `${p1Name} (${p1Year} ${p1Class})`;
+      $('name2').textContent = `${p2Name} (${p2Year} ${p2Class})`;
+      $('label1').textContent = emojiP1;
+      $('label2').textContent = emojiP2;
+
+      $('setupPanel').style.display = 'none';
+      $('gamePanel').style.display = 'block';
+      $('historyIcon').style.display = 'flex';
+
+      phrases = defaults();
+      buildGrid();
+      makePalette();
+      updateScores();
+      updateActivePlayer();
+    }
+
+    $('btnStart').addEventListener('click', startGame);
+
+    populateEmojiPicker();
+
+    // Carrega as frases do JSON ao iniciar
+    loadPhrasesFromJSON().then(() => {
+      updateCategorySelector();
+    });
+
+
+
+    function updateCategorySelector() {
+      const dropdown = document.getElementById('categorySelect');
+
+      // Evento de mudança no dropdown
+      dropdown.addEventListener('change', function () {
+        const btnStart = document.getElementById('btnStartFromWelcome');
+        if (this.value) {
+          btnStart.disabled = false;
+          btnStart.style.opacity = '1';
+          btnStart.style.cursor = 'pointer';
+
+          // Adiciona animação visual ao selecionar
+          this.style.transform = 'scale(1.02)';
+          setTimeout(() => {
+            this.style.transform = 'scale(1)';
+          }, 200);
+        } else {
+          btnStart.disabled = true;
+          btnStart.style.opacity = '0.5';
+          btnStart.style.cursor = 'not-allowed';
+        }
+      });
+
+      // Estilo hover no dropdown
+      dropdown.addEventListener('focus', function () {
+        this.style.borderColor = '#764ba2';
+        this.style.boxShadow = '0 0 0 4px rgba(102, 126, 234, 0.2)';
+      });
+
+      dropdown.addEventListener('blur', function () {
+        this.style.borderColor = '#667eea';
+        this.style.boxShadow = '0 4px 16px rgba(102, 126, 234, 0.25)';
+      });
+
+      dropdown.addEventListener('mouseenter', function () {
+        if (!this.disabled) {
+          this.style.borderColor = '#764ba2';
+        }
+      });
+
+      dropdown.addEventListener('mouseleave', function () {
+        if (!this.disabled) {
+          this.style.borderColor = '#667eea';
+        }
+      });
+    }
+
+    function selectCategoryAndProceed() {
+      const dropdown = document.getElementById('categorySelect');
+      const selectedCategory = dropdown.value;
+
+      if (!selectedCategory) {
+        toast('⚠️ Selecione uma categoria primeiro!');
+        return;
+      }
+
+      // Define a categoria selecionada na variável global
+      selectedGameCategory = selectedCategory;
+
+      // Esconde o painel de boas-vindas e mostra o painel de setup
+      document.getElementById('welcomePanel').style.display = 'none';
+      document.getElementById('setupPanel').style.display = 'block';
+
+      const selectedOption = dropdown.options[dropdown.selectedIndex];
+      toast(`📚 ${selectedOption.textContent} selecionada!`);
+    }
+
+    // Adiciona evento ao botão de continuar
+    document.getElementById('btnStartFromWelcome').addEventListener('click', selectCategoryAndProceed);
+  </script>
+  <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'9a119c1a90a181dd',t:'MTc2MzU3NTI1NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
 </body>
 
 </html>
